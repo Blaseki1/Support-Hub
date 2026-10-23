@@ -9,10 +9,12 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "STORE=memory node server/index.js",
-    "test": "node --test test/app.test.js test/fidelity.test.js",
+    "test": "node --test test/app.test.js test/fidelity.test.js test/docs.test.js",
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1156.0",
+    "archiver": "^5.3.2",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0",
     "exceljs": "^4.4.0",

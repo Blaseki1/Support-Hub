@@ -109,7 +109,7 @@ button{cursor:pointer}
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:600;font-size:12px;flex:none}
 .pop{position:absolute;right:0;top:44px;width:260px;padding:14px;display:grid;gap:10px;z-index:30}
 .main{overflow:auto;padding:24px max(24px,env(safe-area-inset-right,0px));min-width:0}
-.page{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.page{max-width:none;width:100%;margin:0;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
 .page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .page-h h2{font-size:28px}
 .page-h p{margin:4px 0 0;color:var(--muted);max-width:60ch}
@@ -267,6 +267,56 @@ td.r,th.r{text-align:right}
   .gsearch kbd{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== v2 refresh: calmer surfaces, bigger touch targets, clearer tables ===== */
+:root{--bg:#f3f3f0;--line:#d9d9d3;--shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0e0e0e;--line:#34342f}}
+:root[data-theme="dark"]{--bg:#0e0e0e;--line:#34342f}
+.card{border-radius:14px}
+.main{padding:28px clamp(20px,3vw,44px) 48px}
+.page{gap:22px}
+.page-h h2{font-size:30px;line-height:1.1}
+.page-h p{font-size:14.5px;max-width:72ch}
+.inp{padding:11px 13px;border-radius:10px;border-width:1.5px;transition:border-color .12s,box-shadow .12s}
+.inp:focus{outline:none;border-color:var(--fg);box-shadow:0 0 0 4px var(--accent-soft)}
+.inp::placeholder{color:#8a8a84}
+.field label{font-size:12px;letter-spacing:.05em}
+.btn{padding:10px 18px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:2px;transition:filter .12s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn.lg{padding:13px 22px;font-size:15.5px}
+.btn.sm{padding:6px 11px;border-radius:8px}
+.nav a{padding:10px 12px;border-radius:10px}
+.nav a.on{box-shadow:inset 4px 0 0 var(--fg)}
+.top{height:56px;box-shadow:0 1px 0 var(--line)}
+.tablewrap{border-radius:12px;max-height:72vh;overflow:auto}
+th{position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--muted);letter-spacing:.07em}
+td{padding:12px 14px}
+tbody tr:hover td{background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.tile{padding:20px;border-radius:14px;border-bottom:4px solid transparent}
+.tile:hover{border-bottom-color:var(--accent);transform:translateY(-2px)}
+.tile .ti{width:42px;height:42px;border-radius:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.avatar.sm{width:30px;height:30px;font-size:11px}
+.copy{border:0;background:transparent;color:var(--muted);padding:2px 4px;border-radius:6px;vertical-align:middle;line-height:1}
+.copy:hover{background:var(--surface2);color:var(--fg)}.copy .ms{font-size:15px;margin:0}
+.idn{font-weight:500;letter-spacing:.02em;white-space:nowrap}
+.legendbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.hero{padding:22px;display:grid;gap:16px;border-top:5px solid var(--accent)}
+.hero .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.hero .row .field{flex:1 1 280px;max-width:560px}
+.bigin{font-size:18px;padding:14px 16px;letter-spacing:.02em}
+.steps3{display:flex;gap:10px;flex-wrap:wrap;margin:0;padding:0;list-style:none;counter-reset:s3;color:var(--muted);font-size:13.5px}
+.steps3 li{counter-increment:s3;display:flex;gap:8px;align-items:center}
+.steps3 li::before{content:counter(s3);width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:700;font-size:12px}
+.steps3 li+li::after{content:"";}
+.filerow{display:grid;grid-template-columns:44px minmax(0,1.3fr) minmax(0,1.4fr) 90px 110px 130px;gap:14px;align-items:center;padding:14px 16px;border-top:1px solid var(--line)}
+.filerow:first-child{border-top:0}
+.filerow .fi{width:44px;height:44px;border-radius:11px;background:var(--surface2);display:grid;place-items:center}
+.filehead{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface2);border-radius:14px 14px 0 0}
+.filehead.filerow{padding-block:10px}
+@media (max-width:980px){.filerow{grid-template-columns:44px minmax(0,1fr) auto}.filerow .hide-s{display:none}}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--info-soft);color:var(--fg)}
+.note.warn{background:var(--warn-soft)}.note .ms{flex:none;margin-top:1px}
 </style>
 <div id="app"></div>
 <div id="overlay"></div>
@@ -299,10 +349,11 @@ const MODULES=[
  {id:'txns',name:'Transaction History',ico:'receipt_long',desc:'Find an account, pull its transactions for a period and download them as Excel.'},
  {id:'limits',name:'Thresholds & Limits',ico:'speed',desc:'Send and receive thresholds, limits and wallet capacity by profile and service.'},
  {id:'giftcards',name:'Pending Giftcards',ico:'redeem',desc:'Giftcard orders that have not completed, with age and cause.'},
- {id:'gpl',name:'GPL Token Checker',ico:'key',desc:'Look up a GPL token, its state and linked account.'}
+ {id:'gpl',name:'GPL Token Checker',ico:'key',desc:'Look up a GPL token, its state and linked account.'},
+ {id:'docs',name:'Deleted Docs',ico:'folder_open',desc:'Find the ID and selfie files kept for a Partner ID and download them as images.'}
 ];
 const SPECIAL=[
- {id:'dl_images',name:'Download deleted-account images',ico:'photo_library',desc:'Download the ID and selfie images kept on deleted accounts.'},
+ {id:'dl_images',name:'Download deleted-account documents',ico:'photo_library',desc:'Download the ID and selfie files in Deleted Docs.'},
  {id:'unmask',name:'See full ID card and TIN numbers',ico:'visibility',desc:'Show the whole number instead of only the last 3 digits.'}
 ];
 const ADMIN=[
@@ -320,7 +371,7 @@ const DEFAULT_PERMS={
 };
 let USERS=[
  {id:'u1',name:'Carlos Rose',email:'carlosrose94@gmail.com',role:'Admin',perms:[...DEFAULT_PERMS.Admin],status:'active',mfa:true,last:'Today 18:02'},
- {id:'u2',name:'Carleane Dos Santos',email:'carleane@example.com',role:'Agent',perms:['search','txns','giftcards','dl_images'],status:'active',mfa:true,last:'Today 17:41'},
+ {id:'u2',name:'Carleane Dos Santos',email:'carleane@example.com',role:'Agent',perms:['search','txns','giftcards','docs','dl_images'],status:'active',mfa:true,last:'Today 17:41'},
  {id:'u3',name:'Marcus Hinds',email:'marcus@example.com',role:'Supervisor',perms:[...DEFAULT_PERMS.Supervisor],status:'active',mfa:false,last:'Yesterday 16:20'},
  {id:'u4',name:'Priya Singh',email:'priya@example.com',role:'Agent',perms:['search','giftcards','gpl'],status:'active',mfa:true,last:'Mon 11:05'},
  {id:'u5',name:'Devon Ali',email:'devon@example.com',role:'Agent',perms:['search'],status:'disabled',mfa:false,last:'12 Oct 09:14'}
@@ -554,11 +605,11 @@ function renderView(){
 const FIRST=['Joel','Amrita','Devika','Keon','Shanice','Marlon','Tiana','Ravi','Aaliyah','Gavin','Nadia','Leroy'];
 const LAST=['Persaud','Williams','Singh','Hinds','Bacchus','Fraser','Ramdin','Thomas','Narine','Cummings'];
 const fullName=s=>pick(FIRST,s)+' '+pick(LAST,s>>3);
-const SRC={search:'Superset · customer search',fees:'Superset · fee rules',txns:'Superset · transactions',limits:'Superset · thresholds and limits',giftcards:'Superset · giftcards_pending',gpl:'Superset + GPL receipts'};
+const SRC={search:'Superset · customer search',fees:'Superset · fee rules',txns:'Superset · transactions',limits:'Superset · thresholds and limits',giftcards:'Superset · giftcards_pending',gpl:'Superset + GPL receipts',docs:'Superset + S3 · partner documents'};
 function head(title,sub,mod){
  const mm=MODULES.find(m=>m.id===mod)||{ico:'dashboard'};
  return `<div class="page-h"><div style="display:flex;gap:14px;align-items:center"><span class="pi" style="background:var(--accent);color:var(--accent-fg);width:50px;height:50px;border-radius:13px">${ic(mm.ico,'lg')}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div></div>
- <div class="pill neutral" title="Live queries will run through Superset once the curl for this module is added"><span class="dot"></span>${esc(SRC[mod])} · sample data</div></div>`;
+ <div class="pill neutral" title="${LIVE?'Live data':'Preview with made-up data'}"><span class="dot"></span>${esc(SRC[mod]||mod)}${LIVE?'':' · sample data'}</div></div>`;
 }
 function exportBtn(mod){return can('export:'+mod)?`<button class="btn ghost sm" data-export>${ic('download')}Export CSV</button>`:`<button class="btn ghost sm" disabled title="Ask an admin for export access">${ic('lock')}Export CSV</button>`}
 function wireExport(root,mod,get){const b=$('[data-export]',root);if(b)b.onclick=()=>{if(get){const f=get();return saveFile(f.filename,f.data,mod,f.detail)}log('export',mod,'Exported current results');toast('Export started (demo)')}}
@@ -593,6 +644,8 @@ VIEWS.home=v=>{
 };
 
 /* ----- Search Hub ----- */
+const copyBtn=t=>`<button class="copy" type="button" data-copy="${esc(t)}" title="Copy" aria-label="Copy">${ic('content_copy')}</button>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-copy]');if(!b)return;const t=b.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copied')).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Copied')}catch(x){toast('Could not copy')}a.remove()})});
 const maskRaw=v=>v.length<=3?'***':'*'.repeat(v.length-3)+v.slice(-3);
 /* Every filter works on its own. Fill several and choose whether results must match all of them or any of them. */
 const SEARCH_FIELDS=[
@@ -646,16 +699,19 @@ VIEWS.search=v=>{
   const rows=filtered(),box=$('#stab');if(!box)return;
   $('#scount').textContent=`${rows.length} of ${res().rows.length} shown`;
   const canTx=can('txns');
-  box.innerHTML=rows.length?`<div class="tablewrap"><table style="min-width:1080px"><thead><tr><th>Name</th><th>Username</th><th>MSISDN</th><th>Email</th><th>ID</th><th>Account type</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>
-  ${rows.map(r=>{const open=st.open.includes(r.USER_ID);return `<tr><td style="min-width:190px"><b>${esc(fullNm(r))}</b><div class="muted mono" style="white-space:nowrap">${esc(r.USER_ID)} · Partner ${esc(r.PARTNER_ID)}</div></td><td class="mono">${esc(r.USER_NAME)}</td><td class="mono">${esc(r.MOBILE_NUMBER||'—')}</td><td>${esc(r.EMAIL_ID||'—')}</td>
-   <td><div>${esc(r.IDENTIFICATION_TYPE||'—')}</div><div class="mono muted">${r.ID_NUMBER?esc(maskV(r.ID_NUMBER)):'—'}</div></td><td>${esc(r.Account_type)}</td><td>${pill(r.STATUS)}</td><td class="num">${fmtDate(r.CREATED_DATE)}</td>
+  box.innerHTML=rows.length?`<div class="tablewrap"><table style="min-width:1480px"><thead><tr><th>First name</th><th>Last name</th><th>Username</th><th>MSISDN</th><th>Email</th><th>ID type</th><th>ID number</th><th>Account type</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>{const open=st.open.includes(r.USER_ID),given=[r.FIRST_NAME,r.Middle_name].filter(Boolean).join(' '),ini=((r.FIRST_NAME||'?')[0]+(r.LAST_NAME||'')[0]).toUpperCase(),idv=r.ID_NUMBER?maskV(r.ID_NUMBER):'',canCopy=r.ID_NUMBER&&can('unmask')&&!S.mask;
+   return `<tr><td style="min-width:210px"><div style="display:flex;gap:10px;align-items:center"><span class="avatar sm">${esc(ini)}</span><div><b>${esc(given||'—')}</b><div class="muted mono" style="white-space:nowrap">${esc(r.USER_ID)} · Partner ${esc(r.PARTNER_ID)}</div></div></div></td>
+   <td><b>${esc(r.LAST_NAME||'—')}</b></td><td class="mono">${esc(r.USER_NAME||'—')}${r.USER_NAME?copyBtn(r.USER_NAME):''}</td><td class="mono">${esc(r.MOBILE_NUMBER||'—')}${r.MOBILE_NUMBER?copyBtn(r.MOBILE_NUMBER):''}</td><td>${esc(r.EMAIL_ID||'—')}</td>
+   <td>${r.IDENTIFICATION_TYPE?`<span class="chip">${esc(r.IDENTIFICATION_TYPE)}</span>`:'<span class="muted">—</span>'}</td><td class="mono idn">${idv?esc(idv):'<span class="muted">—</span>'}${canCopy?copyBtn(r.ID_NUMBER):''}</td>
+   <td>${esc(r.Account_type||'—')}</td><td>${pill(r.STATUS)}</td><td class="num">${fmtDate(r.CREATED_DATE)}</td>
    <td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-det="${esc(r.USER_ID)}" aria-expanded="${open}">${ic(open?'expand_less':'expand_more')}Details</button> <button class="btn sm" data-tx="${esc(r.USER_ID)}" ${canTx?'':'disabled title="You do not have access to Transaction History"'}>${ic('receipt_long')}Transactions</button></td></tr>
-   ${open?`<tr><td colspan="9" style="background:var(--surface2)"><div class="kv"><div><span>Date of birth</span><b>${fmtDate(r.DOB)}</b></div><div><span>Created by</span><b>${esc(r.CREATED_BY||'—')}</b></div><div><span>Last modified</span><b>${fmtDate(r.LAST_MODIFIED_DATE)}</b></div><div><span>Last modified by</span><b>${esc(r.LAST_MODIFIED_BY||'—')}</b></div><div><span>Place of issue</span><b>${esc(r.PLACE_OF_ISSUE||'—')}</b></div></div>
-    ${/terminat|delet/i.test(r.STATUS)?`<div style="margin-top:12px"><button class="btn ghost sm" ${can('dl_images')?'':'disabled'} data-img="${esc(r.USER_ID)}">${ic(can('dl_images')?'photo_library':'lock')}Deleted-account images</button> <span class="muted" style="font-size:13px">${can('dl_images')?'Turns on once the images query is added.':'Ask an admin for the download images permission.'}</span></div>`:''}</td></tr>`:''}`}).join('')}</tbody></table></div>`
+   ${open?`<tr><td colspan="11" style="background:var(--surface2)"><div class="kv"><div><span>First name</span><b>${esc(r.FIRST_NAME||'—')}</b></div><div><span>Middle name</span><b>${esc(r.Middle_name||'—')}</b></div><div><span>Last name</span><b>${esc(r.LAST_NAME||'—')}</b></div><div><span>ID type</span><b>${esc(r.IDENTIFICATION_TYPE||'—')}</b></div><div><span>ID number</span><b class="mono">${idv?esc(idv):'—'}</b></div><div><span>Place of issue</span><b>${esc(r.PLACE_OF_ISSUE||'—')}</b></div><div><span>Date of birth</span><b>${fmtDate(r.DOB)}</b></div><div><span>Created by</span><b>${esc(r.CREATED_BY||'—')}</b></div><div><span>Last modified</span><b>${fmtDate(r.LAST_MODIFIED_DATE)}</b></div><div><span>Last modified by</span><b>${esc(r.LAST_MODIFIED_BY||'—')}</b></div></div>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn ghost sm" ${can('docs')?'':'disabled'} data-docs="${esc(r.PARTNER_ID)}">${ic(can('docs')?'folder_open':'lock')}Documents (ID and selfie)</button><span class="muted" style="font-size:13px">${can('docs')?(/terminat|delet/i.test(r.STATUS)?'This account is closed. Its stored documents can be downloaded here.':'Opens Deleted Docs for Partner ID '+esc(r.PARTNER_ID)+'.'):'Ask an admin for access to Deleted Docs.'}</span></div></td></tr>`:''}`}).join('')}</tbody></table></div>`
    :'<div class="card empty">No accounts match these filters.</div>';
   $$('[data-det]',box).forEach(b=>b.onclick=()=>{const id=b.dataset.det;st.open=st.open.includes(id)?st.open.filter(x=>x!==id):[...st.open,id];drawTable()});
   $$('[data-tx]',box).forEach(b=>b.onclick=()=>{const r=res().rows.find(x=>x.USER_ID===b.dataset.tx);if(!r)return;S.sel.txnQ=r.USER_NAME;S.sel.txnAuto=r.USER_ID;go('txns')});
-  $$('[data-img]',box).forEach(b=>b.onclick=()=>toast('Waiting for the deleted-account images query.'));
+  $$('[data-docs]',box).forEach(b=>b.onclick=()=>{S.sel.docPartner=b.dataset.docs;go('docs')});
  };
  const drawRes=()=>{
   const box=$('#sres');if(!box)return;const r=res();
@@ -666,6 +722,8 @@ VIEWS.search=v=>{
   const cnt=s=>r.rows.filter(x=>x.STATUS===s).length;
   box.innerHTML=`<div style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr)">
    ${LIVE?'':'<div class="src"><span><b>Preview data.</b> This page is not connected to Superset here, so these accounts are made up to show the layout.</span></div>'}
+   ${LIVE&&r.rows.every(x=>x.ID_NUMBER==null&&x.IDENTIFICATION_TYPE==null)?`<div class="note warn">${ic('info')}<div><b>Superset sent no ID card details for these accounts.</b> That is normal if they have none on file. If every search shows this, an admin should open Data Sources, choose Search Hub and press Reset to defaults, because the saved chart may be the wrong one.</div></div>`:''}
+   ${LIVE&&r.rows.every(x=>!x.LAST_NAME)?`<div class="note warn">${ic('info')}<div><b>Superset sent no last names for these accounts.</b> If every search shows this, an admin should open Data Sources, choose Search Hub and press Reset to defaults.</div></div>`:''}
    ${r.truncated?`<div class="diag"><b>Row limit reached</b><span>Superset returned its maximum of ${fmtN(r.limit)} rows, so some matches may be missing. Add more filters to narrow it down.</span></div>`:''}
    <div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>${r.rows.length} account${r.rows.length===1?'':'s'} found</h3><div class="muted" style="font-size:13px">${used}${Object.keys(r.vals).length>1?` · matching ${r.match==='all'?'all':'any'}`:''} · ${esc(r.env.toUpperCase())} · ${esc(r.at)} · <span id="scount"></span></div></div>${exportBtn('search')}</div>
    <div class="toolbar"><div class="field" style="flex:2 1 240px"><label>Status</label><div class="picker" style="gap:6px">${statuses.map(x=>`<label><input type="checkbox" data-st="${esc(x)}" ${st.status.includes(x)?'checked':''}><span class="chip" style="display:inline-block;cursor:pointer">${esc(x)} · ${cnt(x)}</span></label>`).join('')}</div></div>
@@ -1068,13 +1126,13 @@ function supEditor(key,box,onSaved){
   <div class="pgh" style="padding-top:6px"><h3>Same for UAT and Prod</h3></div>
   <div class="toolbar"><div class="field" style="flex:2 1 260px"><label for="sf_endpoint">API path</label><input class="inp mono" id="sf_endpoint" value="${esc(d.endpoint)}"></div>
    <div class="field" style="flex:1 1 200px"><label for="sf_sc">Search columns (fixed by the app)</label><input class="inp mono" id="sf_sc" value="${esc(d.searchCols.join(', '))}" disabled title="This page is built around these columns, so they cannot be changed here."></div>
-   <div class="field" style="flex:1 1 160px"><label for="sf_dc">Date column</label><input class="inp mono" id="sf_dc" value="${esc(d.dateCol)}"></div>
+   <div class="field" style="flex:1 1 160px"><label for="sf_dc">Date column (fixed)</label><input class="inp mono" id="sf_dc" value="${esc(d.dateCol)}" disabled></div>
    <div class="field" style="flex:0 1 110px"><label for="sf_mc">Min characters</label><input class="inp" id="sf_mc" type="number" min="1" value="${d.minChars}"></div>
    <div class="field" style="flex:0 1 130px"><label for="sf_to">Timeout (seconds)</label><input class="inp" id="sf_to" type="number" min="5" max="600" value="${Number(d.timeoutSec)||60}"></div></div>
-  <div class="field"><label for="sf_fx">Always-applied filters (one per line, for example Account_type IS NOT NULL)</label><textarea class="inp mono" id="sf_fx" rows="2" placeholder="Account_type IS NOT NULL">${esc((d.fixedFilters||[]).map(f=>f.col+' '+f.op).join('\n'))}</textarea></div>
-  <div class="field"><label for="sf_cols">Columns returned (comma separated)</label><textarea class="inp mono" id="sf_cols" rows="3">${esc(d.columns.join(', '))}</textarea></div>
+  <div class="field"><label for="sf_fx">Always-applied filters (fixed by the app)</label><textarea class="inp mono" id="sf_fx" rows="2" disabled>${esc((d.fixedFilters||[]).map(f=>f.col+' '+f.op).join('\n'))}</textarea></div>
+  <div class="field"><label for="sf_cols">Columns returned (fixed by the app, the page and Excel file are built on them)</label><textarea class="inp mono" id="sf_cols" rows="3" disabled>${esc(d.columns.join(', '))}</textarea></div>
   <div class="field"><label for="sf_curl">Or paste a curl to fill these in</label><textarea class="inp mono" id="sf_curl" rows="3" placeholder="curl --location 'http://…/api/v1/chart/data' --data '{…}'"></textarea>
-   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="se_fill">${ic('auto_fix_high')}Fill from curl</button><span class="muted" style="font-size:13px">Fills the ${tab.toUpperCase()} settings.${LIVE?' The login in the curl (cookie, token) is also saved on the server, encrypted.':' Any cookie or token in the curl is ignored.'}</span></div></div>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="se_fill">${ic('auto_fix_high')}Fill from curl</button><span class="muted" style="font-size:13px">Fills the ${tab.toUpperCase()} address, IDs and row limit.${LIVE?' The login in the curl (cookie, token) is also saved on the server, encrypted.':' Any cookie or token in the curl is ignored.'}</span></div></div>
   <details><summary style="cursor:pointer;font-weight:600">Preview the request that will be sent</summary><div class="code" style="margin-top:8px">POST ${esc(e.base?e.base.replace(/\/+$/,'')+d.endpoint:'(no base URL yet)')}
 Content-Type: application/json
 Authorization: added on the server
@@ -1094,7 +1152,7 @@ ${esc(prev)}</div></details>
    if(other&&String(d.envs[tab].datasource)!==String(r.datasource)){msg=`That curl is for "${other[1].label}" (datasource ${r.datasource}), not for "${d.label}". Paste the curl for ${d.label} instead.`;draw();return}
    let saved='';if(LIVE){try{const ra=await api('PUT','/api/admin/superset-auth/'+tab,{curl:raw});saved=' The login in it was saved (encrypted) for '+tab.toUpperCase()+'.';SUPAUTH=(ra&&ra.auth)||SUPAUTH}catch(e){saved=' The login was not saved: '+e.message}}
    Object.assign(d.envs[tab],{base:r.base,datasource:r.datasource??'',slice:r.slice??'',dashboard:r.dashboard??'',rowLimit:r.rowLimit||1000});
-   d.endpoint=r.endpoint||d.endpoint;if(r.columns.length)d.columns=r.columns;d.dateCol=r.dateCol;d.orderBy=r.orderBy;d.fixedFilters=r.fixedFilters;msg='';draw();toast(LIVE?('Filled from curl.'+saved):'Filled from curl. The cookie was ignored.')};
+   d.endpoint=r.endpoint||d.endpoint;msg='';draw();toast(LIVE?('Filled from curl.'+saved):'Filled from curl. The cookie was ignored.')};
   const rs=$('#se_reset',box);if(rs){let armed=false;rs.onclick=async()=>{if(!armed){armed=true;$('#se_rl',box).textContent='Click again to confirm (Prod settings are cleared too)';setTimeout(()=>{armed=false;const l=$('#se_rl',box);if(l)l.textContent='Reset to defaults'},6000);return}
    try{const s=await api('DELETE','/api/admin/connections/'+encodeURIComponent(key));Object.assign(orig,s);toast('Reset to the built-in settings.');box.innerHTML='';onSaved()}catch(e){msg=e.message||'Could not reset.';draw()}}}
   $('#se_save',box).onclick=async()=>{collect();
@@ -1361,9 +1419,98 @@ VIEWS.limits=v=>{
 };
 </script>
 <script>
+/* ===== Deleted Docs: partner documents from Superset (paths) + S3 (files) ===== */
+SRC.docs='Superset + S3 · partner documents';
+SUP['docs.lookup']={module:'docs',label:'Partner documents',desc:'Lists the stored document files (ID, selfie and so on) for a Partner ID. The files themselves come from S3.',env:'uat',timeoutSec:60,
+ envs:{uat:{base:'http://superset.mmgtest.net:8091',datasource:79,slice:86,dashboard:107,rowLimit:10000},prod:{...BLANK_ENV(),rowLimit:10000}},
+ endpoint:'/api/v1/chart/data',searchCols:['partner_id'],fixedFilters:[],dateCol:'',orderBy:[['partner_id',false]],minChars:1,columns:['partner_id','document_id','path','content_type']};
+const fmtSize=n=>n==null?'':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
+const TINY_PNG='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+async function dlLive(url){
+ const r=await fetch(url,{credentials:'same-origin',headers:{'X-Requested-With':'hub'}});
+ if(!r.ok){let m='The download failed.';try{m=(await r.json()).error||m}catch(e){}throw new Error(m)}
+ const m=/filename="([^"]+)"/.exec(r.headers.get('Content-Disposition')||'');saveBlob(await r.blob(),m?m[1]:'download');
+}
+async function docsLookup(partner){
+ if(LIVE)return api('POST','/api/docs/lookup',{partner});
+ await new Promise(r=>setTimeout(r,500));
+ if(/^0+$/.test(partner)||partner==='1')return {partner,files:[],s3:{ok:true},canDownload:can('dl_images'),env:SUP['docs.lookup'].env,at:now()};
+ const h=hash(partner),kinds=[['IDType_nationalId','image/jpeg','jpg'],['selfie','image/jpeg','jpg'],['back','image/png','png'],['IDType_passport','image/jpeg','jpg']],n=2+h%3;
+ const files=kinds.slice(0,n).map((k,i)=>{const id=String(20372034818943+h%1000*13+i*12210);return {n:i+1,docId:id,key:'public_images/'+id+'/17608'+(69793603+i*12211)+'_'+k[0],label:k[0],contentType:k[1],ext:k[2],name:partner+'_'+id+'_'+k[0]+'.'+k[2],size:180000+(h>>(i+2))%400000,state:i===2&&h%2?'missing':'ok'}});
+ return {partner,files,s3:{ok:true},canDownload:can('dl_images'),env:SUP['docs.lookup'].env,at:now()};
+}
+async function docsAccounts(value){
+ if(LIVE)return api('POST','/api/docs/accounts',{value});
+ await new Promise(r=>setTimeout(r,400));
+ return {rows:synthSearch({USER_NAME:value}).slice(0,3).map(a=>({USER_ID:a.USER_ID,PARTNER_ID:a.PARTNER_ID,USER_NAME:a.USER_NAME,MOBILE_NUMBER:a.MOBILE_NUMBER,FIRST_NAME:a.FIRST_NAME,Name:a.LAST_NAME,STATUS:a.STATUS}))};
+}
+VIEWS.docs=v=>{
+ const st=S.filters.docs||(S.filters.docs={partner:'',find:false});
+ let auto=false;if(S.sel.docPartner){st.partner=String(S.sel.docPartner);S.sel.docPartner=null;auto=true;S.cache.docs=null}
+ v.innerHTML=head('Deleted Docs','Type a Partner ID to see every ID and selfie file stored for it. Download them one by one, or all together as a zip. Each file gets the right image extension.','docs')+`
+ <form class="card hero" id="df" autocomplete="off">
+  <ol class="steps3"><li>Enter the Partner ID</li><li>Check the files found</li><li>Download one file, or all as a zip</li></ol>
+  <div class="row"><div class="field"><label for="dp">Partner ID</label><input class="inp bigin mono" id="dp" inputmode="numeric" placeholder="e.g. 32248" value="${esc(st.partner)}" maxlength="40" autofocus></div>
+   <button class="btn lg" type="submit" id="dgo">${ic('folder_open')}Find documents</button></div>
+  <div><button class="btn ghost sm" type="button" id="dfind">${ic('person_search')}I only have a username or mobile number</button></div>
+  <div id="dacc" ${st.find?'':'hidden'} style="display:${st.find?'grid':'none'};gap:10px">
+   <div class="toolbar"><div class="field"><label for="dq">Username or mobile number</label><input class="inp mono" id="dq" placeholder="e.g. 6010256 or 5926010256"></div><button class="btn" type="button" id="dqgo">${ic('search')}Find account</button></div>
+   <div id="dqres"></div></div>
+  <div class="err" id="derr"></div></form>
+ <div id="dres"></div>`;
+ const box=$('#dres');
+ const draw=()=>{
+  const r=S.cache.docs;
+  if(!r){box.innerHTML='<div class="card empty">Enter a Partner ID above to list its documents.</div>';return}
+  const f=r.files,ok=f.filter(x=>x.state!=='missing'&&x.state!=='bad'),can2=r.canDownload;
+  if(!f.length){box.innerHTML=`<div class="card empty"><b>No documents found for Partner ID ${esc(r.partner)}</b><div>Check the number, or try finding the account by username or mobile.</div></div>`;return}
+  box.innerHTML=`<div style="display:grid;gap:14px">
+   ${LIVE?'':'<div class="src"><span><b>Preview data.</b> This page is not connected to Superset or S3 here, so these files are made up and tiny.</span></div>'}
+   ${r.s3&&r.s3.ok===false?`<div class="note warn">${ic('cloud_off')}<div><b>File storage is not connected.</b> ${esc(r.s3.message)}</div></div>`:''}
+   ${!can2?`<div class="note">${ic('lock')}<div><b>You can see the list, but not download.</b> Ask an admin for the permission “Download deleted-account documents”.</div></div>`:''}
+   ${r.truncated?`<div class="diag"><b>Row limit reached</b><span>Some files may be missing from this list.</span></div>`:''}
+   <div class="card" style="overflow:hidden"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:16px">
+     <div><h3>${f.length} document${f.length===1?'':'s'} for Partner ID ${esc(r.partner)}</h3><div class="muted" style="font-size:13px">${ok.length} ready to download · ${esc(r.env.toUpperCase())} · ${esc(r.at)}</div></div>
+     <button class="btn lg" id="dzip" ${can2&&ok.length?'':'disabled'}>${ic('folder_zip')}Download all${LIVE?' (zip)':''}</button></div>
+    <div class="filerow filehead"><span></span><span>Document</span><span class="hide-s">Saved as</span><span class="hide-s">Size</span><span>Status</span><span></span></div>
+    ${f.map((x,i)=>`<div class="filerow"><span class="fi">${ic(x.ext==='pdf'?'picture_as_pdf':'image')}</span>
+     <div style="min-width:0"><b>${esc(x.label)}</b><div class="muted mono" style="overflow-wrap:anywhere">Document ${esc(x.docId)}</div></div>
+     <div class="mono hide-s" style="overflow-wrap:anywhere">${esc(x.name)}</div><div class="hide-s num">${x.size!=null?fmtSize(x.size):'—'}</div>
+     <div>${x.state==='ok'?'<span class="pill good"><span class="dot"></span>Ready</span>':x.state==='missing'?'<span class="pill bad"><span class="dot"></span>Not in S3</span>':x.state==='bad'?'<span class="pill bad"><span class="dot"></span>Bad path</span>':'<span class="pill neutral"><span class="dot"></span>Not checked</span>'}</div>
+     <div class="r"><button class="btn ghost sm" data-dl="${i}" ${can2&&x.state!=='missing'&&x.state!=='bad'?'':'disabled'}>${ic(can2?'download':'lock')}Download</button></div></div>`).join('')}</div>
+   <div class="muted" style="font-size:13px">Files are saved as <span class="mono">PartnerID_DocumentID_label.jpg</span> (or .png, .pdf and so on). The extension is read from the file itself, so it always opens correctly.</div></div>`;
+  $$('[data-dl]',box).forEach(b=>b.onclick=async()=>{const x=f[Number(b.dataset.dl)];b.disabled=true;
+   try{if(LIVE)await dlLive('/api/docs/file?key='+encodeURIComponent(x.key));else{saveBlob(new Blob([Uint8Array.from(atob(TINY_PNG),c=>c.charCodeAt(0))],{type:'image/png'}),x.name.replace(/\.\w+$/,'.png'));log('download','docs','Downloaded document '+x.docId+' for Partner ID '+r.partner+' (demo)')}toast('Downloaded '+x.name)}
+   catch(e){toast(e.message)}b.disabled=false});
+  const z=$('#dzip');if(z)z.onclick=async()=>{z.disabled=true;
+   try{if(LIVE){await dlLive('/api/docs/zip?partner='+encodeURIComponent(r.partner));toast('Zip downloaded')}
+    else{for(const x of ok){saveBlob(new Blob([Uint8Array.from(atob(TINY_PNG),c=>c.charCodeAt(0))],{type:'image/png'}),x.name.replace(/\.\w+$/,'.png'));await new Promise(t=>setTimeout(t,350))}log('download','docs','Downloaded '+ok.length+' documents for Partner ID '+r.partner+' (demo)');toast('Downloaded '+ok.length+' files (demo)')}}
+   catch(e){toast(e.message)}z.disabled=false};
+ };
+ const run=async()=>{
+  const p=$('#dp').value.trim(),er=$('#derr');er.textContent='';
+  if(!/^[A-Za-z0-9_-]{1,40}$/.test(p)){er.textContent='Enter a Partner ID using letters and numbers only.';return}
+  st.partner=p;const go_=$('#dgo');go_.disabled=true;box.innerHTML='<div class="card empty">Looking up documents…</div>';
+  try{S.cache.docs=await docsLookup(p);if(!LIVE)log('search','docs','Deleted Docs: Partner ID '+p+' → '+S.cache.docs.files.length+' file(s)')}catch(e){S.cache.docs=null;er.textContent=e.message;box.innerHTML=''}
+  go_.disabled=false;draw();
+ };
+ $('#df').onsubmit=e=>{e.preventDefault();run()};
+ $('#dfind').onclick=()=>{st.find=!st.find;const d=$('#dacc');d.style.display=st.find?'grid':'none';if(st.find)$('#dq').focus()};
+ const findAcc=async()=>{
+  const q=$('#dq').value.trim(),out=$('#dqres');if(q.length<4){out.innerHTML='<div class="muted">Enter at least 4 characters.</div>';return}
+  out.innerHTML='<div class="muted">Searching…</div>';
+  try{const r=await docsAccounts(q);out.innerHTML=r.rows.length?`<div class="tablewrap"><table style="min-width:0"><thead><tr><th>Name</th><th>Username</th><th>MSISDN</th><th>Status</th><th>Partner ID</th><th></th></tr></thead><tbody>${r.rows.map(a=>`<tr><td>${esc([a.FIRST_NAME,a.Name].filter(Boolean).join(' ')||'—')}</td><td class="mono">${esc(a.USER_NAME||'—')}</td><td class="mono">${esc(a.MOBILE_NUMBER||'—')}</td><td>${pill(a.STATUS)}</td><td class="mono">${esc(a.PARTNER_ID)}</td><td class="r"><button class="btn sm" data-use="${esc(a.PARTNER_ID)}">Use this Partner ID</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">No account found.</div>';
+   $$('[data-use]',out).forEach(b=>b.onclick=()=>{$('#dp').value=b.dataset.use;run()})}catch(e){out.innerHTML=`<div class="err">${esc(e.message)}</div>`}
+ };
+ $('#dqgo').onclick=findAcc;$('#dq').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();findAcc()}};
+ if(auto)run();else draw();
+};
+</script>
+<script>
 /* ----- Users & Permissions ----- */
 function dropUser(uid){S.open.filter(o=>o.user.id===uid).forEach(closeEntry);SESSIONS=SESSIONS.filter(s=>s.uid!==uid)}
-const pcols=()=>[...MODULES.map(m=>[m.id,({search:'Search',fees:'Fees',txns:'History',limits:'Limits',giftcards:'Giftcards',gpl:'GPL'}[m.id]||m.name)]),...SPECIAL.map(s=>[s.id,{dl_images:'Images',unmask:'Unmask',export:'Export'}[s.id]]),['admin','Admin']];
+const pcols=()=>[...MODULES.map(m=>[m.id,({search:'Search',fees:'Fees',txns:'History',limits:'Limits',giftcards:'Giftcards',gpl:'GPL',docs:'Docs'}[m.id]||m.name)]),...SPECIAL.map(s=>[s.id,{dl_images:'Images',unmask:'Unmask',export:'Export'}[s.id]]),['admin','Admin']];
 VIEWS.users=v=>{
  const sel=USERS.find(u=>u.id===S.sel.permUser)||USERS[0];S.sel.permUser=sel.id;
  const q=(S.filters.pq||'').toLowerCase();
@@ -1488,8 +1635,11 @@ VIEWS.sources=v=>{
  <div class="pgh" style="border:0;padding-bottom:0"><h3>Report connections</h3></div>
  <div class="srcgrid">${supCards()}</div>
  <div id="supBox"></div>
- ${LIVE?'<div class="muted">Fees & Commissions, Limits and Giftcards still show sample data. Their queries have not been added yet.</div>':`<div class="pgh" style="border:0;padding-bottom:0"><h3>Other modules</h3></div>
-  <div class="srcgrid">${MODULES.filter(m=>!['txns','search'].includes(m.id)).map(m=>`<div class="card srccard"><div style="display:flex;gap:12px;align-items:center"><span class="pi">${ic(m.ico)}</span><div style="min-width:0"><b>${esc(m.name)}</b><div class="mono muted" style="overflow:hidden;text-overflow:ellipsis">${esc(SRC[m.id].replace('Superset · ',''))}</div></div></div>
+ <div class="pgh" style="border:0;padding-bottom:0"><h3>File storage (AWS S3)</h3></div>
+ <div class="card panel"><div style="display:flex;gap:12px;align-items:center"><span class="pi">${ic('cloud')}</span><div style="min-width:0"><b>Deleted Docs files</b><div class="muted" style="font-size:13px">The files themselves are read from S3 by the server, never by the browser. The AWS login lives on the server (aws configure or .env), not on this page.</div></div></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" id="s3t">${ic('bolt')}Test S3 access</button><span id="s3r" class="muted">${LIVE?'':'Preview only. The live app checks the bucket for real.'}</span></div></div>
+ ${LIVE?'<div class="muted">Pending Giftcards still shows sample data. Its query has not been added yet.</div>':`<div class="pgh" style="border:0;padding-bottom:0"><h3>Other modules</h3></div>
+  <div class="srcgrid">${MODULES.filter(m=>!['txns','search','fees','limits','gpl','docs'].includes(m.id)).map(m=>`<div class="card srccard"><div style="display:flex;gap:12px;align-items:center"><span class="pi">${ic(m.ico)}</span><div style="min-width:0"><b>${esc(m.name)}</b><div class="mono muted" style="overflow:hidden;text-overflow:ellipsis">${esc(SRC[m.id].replace('Superset · ',''))}</div></div></div>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">${m.curl?'<span class="pill good"><span class="dot"></span>Curl saved</span>':'<span class="pill warn"><span class="dot"></span>Awaiting curl</span>'}<button class="btn ghost sm" data-curl="${m.id}">${ic('terminal')}${m.curl?'Replace curl':'Add curl'}</button></div></div>`).join('')}</div>
 `} <div id="curlBox"></div>
  <div class="two">
@@ -1512,6 +1662,7 @@ VIEWS.sources=v=>{
   try{const r=await api('POST','/api/admin/connections/'+encodeURIComponent(k)+'/test');out.innerHTML=r.ok?`<span style="color:var(--good,#1a7f37);font-weight:600">${esc(r.message)}</span>`:`<span style="color:var(--bad,#b42318);font-weight:600">${esc(r.error)}</span>`}catch(e){out.textContent=e.message}
   b.disabled=false});
  wireGpl(v);
+ $('#s3t').onclick=async()=>{const b=$('#s3t'),o=$('#s3r');if(!LIVE){o.innerHTML='<span style="color:var(--good);font-weight:600">Preview: connected to mmg-s3-apps-prod.</span>';return}b.disabled=true;o.textContent='Testing…';try{const r=await api('POST','/api/admin/s3/test');o.innerHTML=r.ok?`<span style="color:var(--good);font-weight:600">${esc(r.message)} Folder: ${esc(r.prefix)}</span>`:`<span style="color:var(--bad);font-weight:600">${esc(r.error)}</span>`}catch(e){o.textContent=e.message}b.disabled=false};
  $$('[data-sup]',v).forEach(b=>b.onclick=()=>{supEditor(b.dataset.sup,$('#supBox'),()=>renderView());$('#supBox').scrollIntoView({behavior:'smooth',block:'nearest'})});
  $$('[data-curl]',v).forEach(b=>b.onclick=()=>{const m=MODULES.find(x=>x.id===b.dataset.curl);
   $('#curlBox').innerHTML=`<div class="card panel"><h3>${esc(m.name)} · curl</h3><div class="field"><label for="cu">Paste curl command</label><textarea class="inp mono" id="cu" rows="5" placeholder="curl 'https://superset.example.com/api/v1/chart/data' -H 'Authorization: Bearer …'"></textarea></div>

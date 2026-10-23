@@ -35,5 +35,6 @@ Object.assign(module.exports, {
     uat: { user: process.env.SUPERSET_UAT_USER || '', pass: process.env.SUPERSET_UAT_PASSWORD || '', token: process.env.SUPERSET_UAT_TOKEN || '', cookie: process.env.SUPERSET_UAT_COOKIE || '' },
     prod: { user: process.env.SUPERSET_PROD_USER || '', pass: process.env.SUPERSET_PROD_PASSWORD || '', token: process.env.SUPERSET_PROD_TOKEN || '', cookie: process.env.SUPERSET_PROD_COOKIE || '' },
   },
+  s3: { bucket: process.env.S3_BUCKET || 'mmg-s3-apps-prod', region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '', prefix: process.env.S3_PREFIX || 'public_images/', maxMb: num(process.env.S3_MAX_MB, 30), localDir: process.env.S3_LOCAL_DIR || '' },
   historyKeepMinutes: num(process.env.HISTORY_KEEP_MINUTES, 30),
 });

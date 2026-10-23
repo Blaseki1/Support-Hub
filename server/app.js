@@ -6,6 +6,7 @@ const D = require('./defaults');
 const Q = require('./queries');
 const { buildWorkbook } = require('./xlsx');
 const { parseGplCurl, UUID } = require('./gpl');
+const S3 = require('./s3');
 const { httpErr } = Q;
 
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -14,7 +15,7 @@ const stamp = (d) => { d = new Date(d); return `${d.getDate()} ${MON[d.getMonth(
 const maskId = (v) => { v = String(v); return v.length <= 3 ? '***' : '•'.repeat(v.length - 3) + v.slice(-3); };
 const clip = (s, n = 300) => String(s == null ? '' : s).replace(/[\r\n\t]+/g, ' ').slice(0, n);
 
-function createApp({ store, superset, config, gpl }) {
+function createApp({ store, superset, config, gpl, s3 }) {
   const app = express();
   if (config.trustProxy) app.set('trust proxy', 1);
   app.disable('x-powered-by');
@@ -37,7 +38,7 @@ function createApp({ store, superset, config, gpl }) {
   // ---- connections & options (settings) ----
   const getConnections = async () => {
     const saved = (await store.getSetting('connections')) || {}, def = D.defaultConnections(), out = {};
-    for (const k of Object.keys(def)) out[k] = { ...def[k], ...(saved[k] || {}), searchCols: def[k].searchCols, envs: { uat: { ...def[k].envs.uat, ...((saved[k] || {}).envs || {}).uat }, prod: { ...def[k].envs.prod, ...((saved[k] || {}).envs || {}).prod } } };
+    for (const k of Object.keys(def)) out[k] = { ...def[k], ...(saved[k] || {}), searchCols: def[k].searchCols, columns: def[k].columns, dateCol: def[k].dateCol, orderBy: def[k].orderBy, fixedFilters: def[k].fixedFilters, envs: { uat: { ...def[k].envs.uat, ...((saved[k] || {}).envs || {}).uat }, prod: { ...def[k].envs.prod, ...((saved[k] || {}).envs || {}).prod } } };
     return out;
   };
   const customIds = async () => (await store.listOptions()).map((o) => o.id);
@@ -127,6 +128,8 @@ function createApp({ store, superset, config, gpl }) {
   // ---- Search Hub ----
   const FIELD_LABEL = { ID_NUMBER: 'ID number', USER_NAME: 'Username', MOBILE_NUMBER: 'MSISDN', FIRST_NAME: 'First name', Middle_name: 'Middle name', LAST_NAME: 'Last name', EMAIL_ID: 'Email' };
   const outRows = (rows, user) => rows.map((r) => (r.ID_NUMBER && !user.perms.includes('unmask') ? { ...r, ID_NUMBER: maskId(r.ID_NUMBER) } : r));
+  // Superset sometimes returns a column in a different letter case (id_number vs ID_NUMBER). Map it back so the page always finds it.
+  const fixKeys = (r, cols) => { const low = new Map(Object.keys(r).map((k) => [k.toLowerCase(), k])); const o = { ...r }; for (const c of cols) if (!(c in o) && low.has(c.toLowerCase())) o[c] = r[low.get(c.toLowerCase())]; return o; };
   const hasAny = (row, col, vs) => { const cell = String(row[col] == null ? '' : row[col]).toLowerCase(); return vs.some((v) => cell.includes(String(v).toLowerCase())); };
 
   app.post('/api/search', auth, need('search'), wrap(async (req, res) => {
@@ -143,11 +146,74 @@ function createApp({ store, superset, config, gpl }) {
     const t0 = Date.now();
     const resp = await superset.query(e.base, q.endpoint, q.env, body, q.timeoutSec, ctxOf(q));
     let { rows, rowcount } = Q.rowsFrom(resp);
+    rows = rows.map((r) => fixKeys(r, q.columns));
     const lim = Number(e.rowLimit) || 1000, truncated = rowcount >= lim;
     // The dataset matches ANY filled field. "Match all" keeps only rows that fit every filled field.
     if (match === 'all' && Object.keys(used).length > 1) rows = rows.filter((r) => Object.keys(per).every((c) => hasAny(r, c, per[c])));
     log(req, 'search', 'search', 'Search Hub: ' + Object.entries(used).map(([c, v]) => `${FIELD_LABEL[c] || c} "${v}"`).join(match === 'all' ? ' and ' : ' or ') + ` → ${rows.length} found (${Date.now() - t0} ms)`);
     res.json({ rows: outRows(rows, req.user), total: rows.length, truncated, limit: lim, env: q.env, at: new Date().toTimeString().slice(0, 8), match, vals: used });
+  }));
+
+
+  // ---- Deleted Docs: file paths come from Superset (by Partner ID), the files themselves from S3 ----
+  const S3CFG = (config.s3 || {}), PREFIX = S3CFG.prefix || 'public_images/';
+  const docKeys = new Map(); // user id -> Map(key -> { partner, docId, ct, exp }): only paths we just looked up can be downloaded
+  const rememberDocs = (uid, files, partner) => { const m = docKeys.get(uid) || new Map(), n = Date.now(); for (const [k, v] of m) if (v.exp < n) m.delete(k); for (const f of files) if (f.key) m.set(f.key, { partner, docId: f.docId, ct: f.contentType, exp: n + 30 * 60000 }); docKeys.set(uid, m); };
+  const s3Info = () => (s3 && s3.configured() ? { ok: true, bucket: S3CFG.bucket } : { ok: false, message: 'AWS is not set up on the server yet, so files cannot be listed or downloaded. An admin can follow the "Deleted Docs" step in the README.' });
+  const docOut = (p, d, i) => { const key = S3.safeKey(d.path, PREFIX); return { n: i + 1, docId: String(d.document_id == null ? '' : d.document_id), key, bad: key ? '' : 'Path is not under ' + PREFIX, label: S3.labelOf(d.path || ''), contentType: d.content_type || '', ext: S3.EXT[String(d.content_type || '').toLowerCase().split(';')[0]] || '' }; };
+
+  app.post('/api/docs/accounts', auth, need('docs'), wrap(async (req, res) => {
+    const q = (await getConnections())['txns.lookup'], e = Q.active(q);
+    const val = Q.cleanValue(req.body && req.body.value, q.minChars);
+    if (!val) throw httpErr(400, `Enter at least ${q.minChars} characters.`);
+    if (!e.base) throw httpErr(503, `The ${q.env.toUpperCase()} Superset address is not set for Account lookup. Add it under Data Sources.`);
+    const { rows } = Q.rowsFrom(await superset.query(e.base, q.endpoint, q.env, Q.buildBody(q, Q.variants(val), 'No filter'), q.timeoutSec, ctxOf(q)));
+    log(req, 'search', 'docs', `Deleted Docs account lookup: "${val}" → ${rows.length} found`);
+    res.json({ rows: rows.map((r) => ({ USER_ID: r.USER_ID, PARTNER_ID: r.PARTNER_ID, USER_NAME: r.USER_NAME, MOBILE_NUMBER: r.MOBILE_NUMBER, FIRST_NAME: r.FIRST_NAME, Name: r.Name, STATUS: r.STATUS })) });
+  }));
+
+  app.post('/api/docs/lookup', auth, need('docs'), wrap(async (req, res) => {
+    const q = (await getConnections())['docs.lookup'], e = Q.active(q);
+    const partner = String((req.body && req.body.partner) || '').trim();
+    if (!/^[A-Za-z0-9_-]{1,40}$/.test(partner)) throw httpErr(400, 'Enter a Partner ID (letters and numbers only).');
+    if (!e.base) throw httpErr(503, `The ${q.env.toUpperCase()} Superset address is not set. Add it under Data Sources.`);
+    const t0 = Date.now(), resp = await superset.query(e.base, q.endpoint, q.env, Q.buildBody(q, { partner_id: [partner] }, 'No filter'), q.timeoutSec, ctxOf(q));
+    const { rows, rowcount } = Q.rowsFrom(resp), files = rows.map((r) => docOut(partner, fixKeys(r, q.columns), 0)).map((f, i) => ({ ...f, n: i + 1 }));
+    const info = s3Info();
+    if (info.ok) await Promise.all(files.map(async (f) => { if (!f.key) { f.state = 'bad'; return; } try { const h = await s3.head(f.key); f.size = h.length; f.state = 'ok'; if (!f.ext) f.ext = S3.sniff(null, h.contentType); } catch (x) { f.state = x.code === 'missing' ? 'missing' : 'unknown'; f.note = x.message; } }));
+    else files.forEach((f) => { f.state = f.key ? 'unknown' : 'bad'; });
+    files.forEach((f) => { f.ext = f.ext || 'jpg'; f.name = S3.fileName(partner, f.docId, f.key || f.label, f.ext); });
+    if (req.user.perms.includes('dl_images')) rememberDocs(req.user.id, files, partner);
+    log(req, 'search', 'docs', `Deleted Docs: Partner ID ${partner} → ${files.length} file(s) (${Date.now() - t0} ms)`);
+    res.json({ partner, files, s3: info, canDownload: req.user.perms.includes('dl_images'), env: q.env, at: new Date().toTimeString().slice(0, 8), truncated: rowcount >= (Number(e.rowLimit) || 1000) });
+  }));
+
+  const hits = new Map(); // simple brake: one person can start at most 120 file or zip downloads in 10 minutes
+  const dlBrake = (req, res, next) => { const n = Date.now(), l = (hits.get(req.user.id) || []).filter((x) => n - x < 600000); if (l.length >= 120) return res.status(429).json({ error: 'Too many downloads in a short time. Wait a few minutes and try again.' }); l.push(n); hits.set(req.user.id, l); next(); };
+  const sendFile = (res, name, ext, buf) => { res.setHeader('Content-Type', S3.MIME[ext] || 'application/octet-stream'); res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/[^\w.\-]/g, '_')}"`); res.setHeader('Content-Length', buf.length); res.end(buf); };
+  app.get('/api/docs/file', auth, need('docs', 'dl_images'), dlBrake, wrap(async (req, res) => {
+    const key = S3.safeKey(req.query.key, PREFIX), ok = key && (docKeys.get(req.user.id) || new Map()).get(key);
+    if (!key) throw httpErr(400, 'That is not a valid file path.');
+    if (!ok || ok.exp < Date.now()) throw httpErr(403, 'Look up this Partner ID again, then download the file.');
+    if (!s3 || !s3.configured()) throw httpErr(503, s3Info().message, 's3_config');
+    const { buf, contentType } = await s3.fetch(key), ext = S3.sniff(buf, ok.ct || contentType);
+    log(req, 'download', 'docs', `Downloaded document ${ok.docId} for Partner ID ${ok.partner} (.${ext}, ${buf.length} bytes)`);
+    sendFile(res, S3.fileName(ok.partner, ok.docId, key, ext), ext, buf);
+  }));
+  app.get('/api/docs/zip', auth, need('docs', 'dl_images'), dlBrake, wrap(async (req, res) => {
+    const partner = String(req.query.partner || '').trim(), mine = [...(docKeys.get(req.user.id) || new Map())].filter(([, v]) => v.partner === partner && v.exp > Date.now());
+    if (!mine.length) throw httpErr(403, 'Look up this Partner ID again, then download.');
+    if (!s3 || !s3.configured()) throw httpErr(503, s3Info().message, 's3_config');
+    const got = [], failed = []; let total = 0;
+    for (const [key, v] of mine) { try { const r = await s3.fetch(key); total += r.buf.length; if (total > 250 * 1048576) throw httpErr(413, 'Too much to zip at once. Download the files one by one.'); const ext = S3.sniff(r.buf, v.ct || r.contentType); got.push({ name: S3.fileName(partner, v.docId, key, ext), buf: r.buf }); } catch (x) { if (x.status === 413) throw x; failed.push(`${v.docId}: ${x.message}`); } }
+    if (!got.length) throw httpErr(404, failed[0] || 'No files could be read from S3.');
+    const seen = new Set(); got.forEach((g) => { let n = g.name, i = 1; while (seen.has(n)) n = g.name.replace(/(\.\w+)$/, `_${++i}$1`); seen.add(n); g.name = n; });
+    res.setHeader('Content-Type', 'application/zip'); res.setHeader('Content-Disposition', `attachment; filename="partner_${partner.replace(/[^\w-]/g, '')}_documents.zip"`);
+    const z = require('archiver')('zip', { zlib: { level: 0 } }); z.on('error', () => res.destroy()); z.pipe(res);
+    for (const g of got) z.append(g.buf, { name: g.name });
+    if (failed.length) z.append('Some files could not be downloaded:\n' + failed.join('\n') + '\n', { name: '_not_downloaded.txt' });
+    log(req, 'download', 'docs', `Downloaded ${got.length} document(s) as a zip for Partner ID ${partner}${failed.length ? ` (${failed.length} failed)` : ''}`);
+    await z.finalize();
   }));
 
   // ---- Fees & Commissions, Thresholds & Limits: reference tables with dropdown filters ----
@@ -349,6 +415,10 @@ function createApp({ store, superset, config, gpl }) {
       res.json({ ok: false, code: x.code || 'error', error: x.message, ms: Date.now() - t0 });
     }
   }));
+  app.post('/api/admin/s3/test', admin, wrap(async (req, res) => {
+    if (!s3 || !s3.configured()) return res.json({ ok: false, code: 's3_config', error: 'AWS_REGION is not set on the server, so S3 is switched off.', bucket: S3CFG.bucket, prefix: PREFIX });
+    const r = await s3.test(); log(req, 'setting', 'admin', `Tested S3 access: ${r.ok ? 'OK' : r.error}`); res.json({ ...r, bucket: S3CFG.bucket, region: S3CFG.region, prefix: PREFIX });
+  }));
   app.delete('/api/admin/connections/:key', admin, wrap(async (req, res) => {
     if (!D.defaultConnections()[req.params.key]) throw httpErr(404, 'Unknown connection.');
     const saved = (await store.getSetting('connections')) || {}; delete saved[req.params.key]; await store.setSetting('connections', saved);
@@ -364,11 +434,7 @@ function createApp({ store, superset, config, gpl }) {
     if (b.minChars !== undefined) { const m = Number(b.minChars); if (!(m >= 1 && m <= 20)) throw httpErr(400, 'Minimum characters must be between 1 and 20.'); next.minChars = Math.round(m); }
     if (b.endpoint !== undefined) { if (!/^\/[\w\-./]+$/.test(b.endpoint)) throw httpErr(400, 'The endpoint must be a path such as /api/v1/chart/data.'); next.endpoint = b.endpoint; }
     const colList = (x, what) => { if (!Array.isArray(x) || x.some((c) => typeof c !== 'string' || !/^[\w .\-]{1,80}$/.test(c))) throw httpErr(400, `${what} contains an invalid column name.`); return x; };
-    // searchCols are fixed by the app (each page is built around them), so any value sent here is ignored
-    if (b.columns !== undefined) next.columns = colList(b.columns, 'Columns');
-    if (b.dateCol !== undefined) next.dateCol = b.dateCol ? colList([b.dateCol], 'Date column')[0] : '';
-    if (b.orderBy !== undefined) { if (!Array.isArray(b.orderBy) || b.orderBy.some((o) => !Array.isArray(o) || typeof o[0] !== 'string' || typeof o[1] !== 'boolean')) throw httpErr(400, 'Order by is not valid.'); next.orderBy = b.orderBy; }
-    if (b.fixedFilters !== undefined) { if (!Array.isArray(b.fixedFilters) || b.fixedFilters.some((f) => !f || !/^[\w .\-]{1,80}$/.test(f.col || '') || !['IS NOT NULL', 'IS NULL'].includes(f.op))) throw httpErr(400, 'Always-applied filters can only be IS NOT NULL or IS NULL.'); next.fixedFilters = b.fixedFilters.map((f) => ({ col: f.col, op: f.op })); }
+    // searchCols, columns, dateCol, orderBy and fixedFilters are fixed by the app (each page and the Excel file are built on them), so values sent here are ignored
     if (b.envs !== undefined) for (const t of ['uat', 'prod']) {
       const e = (b.envs || {})[t]; if (!e) continue;
       const base = String(e.base || '').trim().replace(/\/+$/, '');

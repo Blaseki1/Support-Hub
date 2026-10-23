@@ -290,9 +290,10 @@ test('a wrong curl pasted into a connection cannot break its search fields; rese
   saved['search.lookup'] = { ...saved['search.lookup'], searchCols: ['MOBILE_NUMBER', 'USER_NAME'], columns: ['USER_ID'], dateCol: 'CREATED_DATE' };
   await store.setSetting('connections', saved);
   let c = (await admin.get('/api/admin/connections')).data.connections['search.lookup'];
-  assert.equal(c.searchCols.length, 7); // fixed by the app
-  assert.equal((await admin.put('/api/admin/connections/search.lookup', { searchCols: ['EMAIL_ID'], timeoutSec: 60 })).status, 200);
-  c = (await admin.get('/api/admin/connections')).data.connections['search.lookup']; assert.equal(c.searchCols.length, 7);
+  assert.equal(c.searchCols.length, 7); assert.equal(c.columns.length, 18); assert.ok(c.columns.includes('LAST_NAME')); assert.equal(c.dateCol, ''); // fixed by the app
+  assert.equal((await admin.put('/api/admin/connections/search.lookup', { searchCols: ['EMAIL_ID'], columns: ['x'], dateCol: 'CREATED_DATE', timeoutSec: 60 })).status, 200);
+  c = (await admin.get('/api/admin/connections')).data.connections['search.lookup']; assert.equal(c.searchCols.length, 7); assert.equal(c.columns.length, 18);
+  const hit = await admin.post('/api/search', { filters: { USER_NAME: '6010256' } }); assert.equal(hit.status, 200); assert.equal(hit.data.rows[0].LAST_NAME, 'Persaud'); // last name still comes back
   const r = await admin.del('/api/admin/connections/search.lookup'); assert.equal(r.status, 200);
   assert.equal(r.data.columns.length, 18); assert.equal(r.data.dateCol, ''); assert.equal(r.data.envs.uat.datasource, 76);
   assert.equal((await admin.del('/api/admin/connections/nope')).status, 404);

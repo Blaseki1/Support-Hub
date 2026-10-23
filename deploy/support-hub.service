@@ -1,0 +1,23 @@
+# Copy to /etc/systemd/system/support-hub.service, then:
+#   sudo systemctl daemon-reload && sudo systemctl enable --now support-hub
+[Unit]
+Description=Support Hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hub
+Group=hub
+WorkingDirectory=/opt/support-hub
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=3
+# Settings come from /opt/support-hub/.env. AWS login comes from /home/hub/.aws (aws configure) or the variables in .env.
+Environment=NODE_ENV=production
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

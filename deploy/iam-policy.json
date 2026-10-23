@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListOnlyThePublicImagesFolder",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::mmg-s3-apps-prod",
+      "Condition": { "StringLike": { "s3:prefix": ["public_images/*", "public_images/"] } }
+    },
+    {
+      "Sid": "ReadFilesInThePublicImagesFolder",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::mmg-s3-apps-prod/public_images/*"
+    }
+  ]
+}
