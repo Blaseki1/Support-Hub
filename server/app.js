@@ -5,6 +5,7 @@ const A = require('./auth');
 const D = require('./defaults');
 const Q = require('./queries');
 const { buildWorkbook } = require('./xlsx');
+const { parseGplCurl, UUID } = require('./gpl');
 const { httpErr } = Q;
 
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -13,7 +14,7 @@ const stamp = (d) => { d = new Date(d); return `${d.getDate()} ${MON[d.getMonth(
 const maskId = (v) => { v = String(v); return v.length <= 3 ? '***' : '•'.repeat(v.length - 3) + v.slice(-3); };
 const clip = (s, n = 300) => String(s == null ? '' : s).replace(/[\r\n\t]+/g, ' ').slice(0, n);
 
-function createApp({ store, superset, config }) {
+function createApp({ store, superset, config, gpl }) {
   const app = express();
   if (config.trustProxy) app.set('trust proxy', 1);
   app.disable('x-powered-by');
@@ -36,7 +37,7 @@ function createApp({ store, superset, config }) {
   // ---- connections & options (settings) ----
   const getConnections = async () => {
     const saved = (await store.getSetting('connections')) || {}, def = D.defaultConnections(), out = {};
-    for (const k of Object.keys(def)) out[k] = { ...def[k], ...(saved[k] || {}), envs: { uat: { ...def[k].envs.uat, ...((saved[k] || {}).envs || {}).uat }, prod: { ...def[k].envs.prod, ...((saved[k] || {}).envs || {}).prod } } };
+    for (const k of Object.keys(def)) out[k] = { ...def[k], ...(saved[k] || {}), searchCols: def[k].searchCols, envs: { uat: { ...def[k].envs.uat, ...((saved[k] || {}).envs || {}).uat }, prod: { ...def[k].envs.prod, ...((saved[k] || {}).envs || {}).prod } } };
     return out;
   };
   const customIds = async () => (await store.listOptions()).map((o) => o.id);
@@ -147,6 +148,78 @@ function createApp({ store, superset, config }) {
     if (match === 'all' && Object.keys(used).length > 1) rows = rows.filter((r) => Object.keys(per).every((c) => hasAny(r, c, per[c])));
     log(req, 'search', 'search', 'Search Hub: ' + Object.entries(used).map(([c, v]) => `${FIELD_LABEL[c] || c} "${v}"`).join(match === 'all' ? ' and ' : ' or ') + ` → ${rows.length} found (${Date.now() - t0} ms)`);
     res.json({ rows: outRows(rows, req.user), total: rows.length, truncated, limit: lim, env: q.env, at: new Date().toTimeString().slice(0, 8), match, vals: used });
+  }));
+
+  // ---- Fees & Commissions, Thresholds & Limits: reference tables with dropdown filters ----
+  const REF = { fees: { key: 'fees.rules', cols: ['service_name', 'SENDER_PROFILE', 'RECEIVER_PROFILE'], label: 'Fees & Commissions' }, limits: { key: 'limits.rules', cols: ['PROFILE_NAME', 'service_display_name'], label: 'Thresholds & Limits' } };
+  const refCache = new Map(); // one full copy per connection, kept 10 minutes
+  async function refAll(q) {
+    const e = Q.active(q), k = [q.env, e.base, e.datasource, e.slice, e.rowLimit].join('|'), hit = refCache.get(k);
+    if (hit && Date.now() - hit.at < 600000) return hit;
+    if (!e.base) throw httpErr(503, `The ${q.env.toUpperCase()} Superset address is not set. Add it under Data Sources.`);
+    const { rows, rowcount } = Q.rowsFrom(await superset.query(e.base, q.endpoint, q.env, Q.buildBody(q, {}, 'No filter'), q.timeoutSec, ctxOf(q)));
+    const limit = Number(e.rowLimit) || 1000, opts = {};
+    for (const c of q.searchCols) opts[c] = [...new Set(rows.map((r) => r[c]).filter((v) => v !== null && v !== undefined && v !== '').map(String))].sort((x, y) => x.localeCompare(y, undefined, { numeric: true }));
+    const v = { at: Date.now(), rows, opts, truncated: rowcount >= limit, limit };
+    refCache.set(k, v); return v;
+  }
+  const refMod = (req) => { const m = REF[req.params.mod]; if (!m) throw httpErr(404, 'Unknown module.'); return m; };
+  const refNeed = (req, res, next) => { const m = REF[req.params.mod]; if (!m) return res.status(404).json({ error: 'Unknown module.' }); return need(req.params.mod)(req, res, next); };
+  app.get('/api/ref/:mod/options', auth, refNeed, wrap(async (req, res) => {
+    const m = refMod(req), q = (await getConnections())[m.key], all = await refAll(q);
+    res.json({ options: all.opts, total: all.rows.length, truncated: all.truncated, limit: all.limit, env: q.env });
+  }));
+  app.post('/api/ref/:mod/query', auth, refNeed, wrap(async (req, res) => {
+    const m = refMod(req), q = (await getConnections())[m.key], all = await refAll(q), want = {};
+    for (const c of q.searchCols) {
+      let v = (req.body && req.body.filters || {})[c]; if (v === undefined || v === '' || v === null) continue;
+      v = (Array.isArray(v) ? v : [v]).map(String).slice(0, 50);
+      if (v.some((x) => !all.opts[c].includes(x))) throw httpErr(400, `Unknown value for ${c}. Reload the page and pick from the list.`);
+      want[c] = v;
+    }
+    let rows;
+    if (!Object.keys(want).length) rows = all.rows;
+    else if (!all.truncated) rows = all.rows.filter((r) => Object.entries(want).every(([c, v]) => v.includes(String(r[c]))));
+    else { const e = Q.active(q); rows = Q.rowsFrom(await superset.query(e.base, q.endpoint, q.env, Q.buildBody(q, want, 'No filter'), q.timeoutSec, ctxOf(q))).rows; }
+    log(req, 'search', req.params.mod, `${m.label}: ${Object.entries(want).map(([c, v]) => `${c} = ${v.join(' / ')}`).join(', ') || 'all rows'} → ${rows.length} row(s)`);
+    res.json({ rows, total: rows.length, truncated: !Object.keys(want).length && all.truncated, limit: all.limit, env: q.env, at: new Date().toTimeString().slice(0, 8) });
+  }));
+
+  // ---- GPL token checker ----
+  const getGpl = async () => { const s = (await store.getSetting('gpl')) || {}, d = D.defaultGpl(); return { ...d, ...s, envs: { uat: { ...d.envs.uat, ...((s.envs || {}).uat || {}) }, prod: { ...d.envs.prod, ...((s.envs || {}).prod || {}) } } }; };
+  const norm = (x) => String(x == null ? '' : x).trim().toLowerCase();
+  function compareGpl(uuid, rows, g) {
+    if (!g) return { uuid: 'not_found', serial: 'unknown', amount: 'unknown' };
+    const serials = rows.map((r) => norm(r.Serial_number)).filter(Boolean);
+    const amts = rows.map((r) => Number(r.amount)).filter((n) => !isNaN(n));
+    return {
+      uuid: norm(g.reference) === norm(uuid) ? 'match' : 'differ',
+      serial: !serials.length || !g.meter ? 'unknown' : serials.includes(norm(g.meter)) ? 'match' : 'differ',
+      amount: !amts.length || g.totalNumber == null ? 'unknown' : amts.includes(g.totalNumber) ? 'match' : amts.some((n) => Math.abs(n - g.totalNumber * 100) < 0.5) ? 'match_cents' : 'differ',
+    };
+  }
+  app.post('/api/gpl/lookup', auth, need('gpl'), wrap(async (req, res) => {
+    const q = (await getConnections())['gpl.lookup'], cfg = await getGpl(), e = Q.active(q);
+    const val = Q.cleanValue(req.body && req.body.value, q.minChars);
+    if (!val) throw httpErr(400, `Enter at least ${q.minChars} characters.`);
+    if (!e.base) throw httpErr(503, `The ${q.env.toUpperCase()} Superset address is not set. Add it under Data Sources.`);
+    const byUuid = UUID.test(val), col = byUuid ? 'UUID' : 'TRANSACTION_ID', lim = Number(e.rowLimit) || 1000;
+    const run = (c, v) => superset.query(e.base, q.endpoint, q.env, Q.buildBody(q, { [c]: [v] }, 'No filter'), q.timeoutSec, ctxOf(q)).then(Q.rowsFrom);
+    const first = await run(col, val), rows = first.rows;
+    const uuids = [...new Set(rows.map((r) => norm(r.UUID)).filter((u) => UUID.test(u)))].slice(0, 5);
+    const checks = await Promise.all(uuids.map(async (u) => {
+      const mine = rows.filter((r) => norm(r.UUID) === u);
+      let dupRows = mine, dupError = null;
+      if (!byUuid) { try { dupRows = (await run('UUID', u)).rows; } catch (x) { dupError = x.message; } }
+      let g = null, gplError = null, gplCode = null;
+      try { g = await gpl.receipt(cfg, cfg.env, u, cfg.timeoutSec); } catch (x) { gplError = x.message; gplCode = x.code || 'error'; }
+      const ids = [...new Set(dupRows.map((r) => String(r.TRANSACTION_ID)))];
+      return { uuid: u, rows: mine, dupCount: dupRows.length, isDuplicate: dupRows.length > 1, dupRows: dupRows.length > 1 ? dupRows : [], dupTransactionIds: ids, dupError,
+        gpl: g, gplError, gplCode, compare: gplError ? { uuid: 'unknown', serial: 'unknown', amount: 'unknown' } : compareGpl(u, mine, g) };
+    }));
+    const dup = checks.filter((c) => c.isDuplicate).length, found = checks.filter((c) => c.gpl).length;
+    log(req, 'search', 'gpl', `GPL check: ${byUuid ? 'UUID' : 'Transaction ID'} "${val}" → ${rows.length} row(s), ${dup ? dup + ' duplicate UUID' : 'no duplicate UUID'}, GPL receipt ${found ? 'found' : 'not found'}`);
+    res.json({ kind: byUuid ? 'uuid' : 'transaction', value: val, rows, truncated: first.rowcount >= lim, limit: lim, checks, env: q.env, gplEnv: cfg.env, at: new Date().toTimeString().slice(0, 8) });
   }));
 
   // ---- Transaction History ----
@@ -276,6 +349,13 @@ function createApp({ store, superset, config }) {
       res.json({ ok: false, code: x.code || 'error', error: x.message, ms: Date.now() - t0 });
     }
   }));
+  app.delete('/api/admin/connections/:key', admin, wrap(async (req, res) => {
+    if (!D.defaultConnections()[req.params.key]) throw httpErr(404, 'Unknown connection.');
+    const saved = (await store.getSetting('connections')) || {}; delete saved[req.params.key]; await store.setSetting('connections', saved);
+    superset.reset(); refCache.clear();
+    log(req, 'setting', 'admin', `Reset Superset connection "${req.params.key}" to the built-in defaults`);
+    res.json((await getConnections())[req.params.key]);
+  }));
   app.put('/api/admin/connections/:key', admin, wrap(async (req, res) => {
     const all = await getConnections(), cur = all[req.params.key]; if (!cur) throw httpErr(404, 'Unknown connection.');
     const b = req.body || {}, next = { ...cur };
@@ -284,7 +364,7 @@ function createApp({ store, superset, config }) {
     if (b.minChars !== undefined) { const m = Number(b.minChars); if (!(m >= 1 && m <= 20)) throw httpErr(400, 'Minimum characters must be between 1 and 20.'); next.minChars = Math.round(m); }
     if (b.endpoint !== undefined) { if (!/^\/[\w\-./]+$/.test(b.endpoint)) throw httpErr(400, 'The endpoint must be a path such as /api/v1/chart/data.'); next.endpoint = b.endpoint; }
     const colList = (x, what) => { if (!Array.isArray(x) || x.some((c) => typeof c !== 'string' || !/^[\w .\-]{1,80}$/.test(c))) throw httpErr(400, `${what} contains an invalid column name.`); return x; };
-    if (b.searchCols !== undefined) { next.searchCols = colList(b.searchCols, 'Search columns'); if (!next.searchCols.length) throw httpErr(400, 'Add at least one search column.'); }
+    // searchCols are fixed by the app (each page is built around them), so any value sent here is ignored
     if (b.columns !== undefined) next.columns = colList(b.columns, 'Columns');
     if (b.dateCol !== undefined) next.dateCol = b.dateCol ? colList([b.dateCol], 'Date column')[0] : '';
     if (b.orderBy !== undefined) { if (!Array.isArray(b.orderBy) || b.orderBy.some((o) => !Array.isArray(o) || typeof o[0] !== 'string' || typeof o[1] !== 'boolean')) throw httpErr(400, 'Order by is not valid.'); next.orderBy = b.orderBy; }
@@ -300,7 +380,7 @@ function createApp({ store, superset, config }) {
     }
     if (!next.envs[next.env].base) throw httpErr(400, `Add the ${next.env.toUpperCase()} base URL before making it the live one.`);
     const saved = (await store.getSetting('connections')) || {}; saved[req.params.key] = next; await store.setSetting('connections', saved);
-    superset.reset(); // pick up any change of address
+    superset.reset(); refCache.clear(); // pick up any change of address
     log(req, 'setting', 'admin', `Updated Superset connection "${next.label}" (hub uses ${next.env.toUpperCase()}, timeout ${next.timeoutSec}s)`);
     res.json((await getConnections())[req.params.key]);
   }));
@@ -321,10 +401,48 @@ function createApp({ store, superset, config }) {
     if (!['uat', 'prod'].includes(req.params.env)) throw httpErr(400, 'Environment must be uat or prod.');
     await store.setSecret('superset:' + req.params.env, null); superset.reset(); res.json({ auth: await authStatus() });
   }));
+  // GPL: address, path and timeout, plus the login (Basic auth / cookie) taken from a pasted curl and stored encrypted.
+  const gplAuthStatus = async () => { const o = {}; for (const env of ['uat', 'prod']) { const s = await store.getSecret('gpl:' + env); o[env] = s ? { saved: true, at: s.at, headers: Object.keys(s.headers) } : { saved: false }; } return o; };
+  app.get('/api/admin/gpl', admin, wrap(async (req, res) => res.json({ gpl: await getGpl(), auth: await gplAuthStatus() })));
+  app.put('/api/admin/gpl', admin, wrap(async (req, res) => {
+    const b = req.body || {}, cur = await getGpl(), next = { ...cur, envs: { uat: { ...cur.envs.uat }, prod: { ...cur.envs.prod } } };
+    if (b.env !== undefined) { if (!['uat', 'prod'].includes(b.env)) throw httpErr(400, 'Environment must be uat or prod.'); next.env = b.env; }
+    if (b.timeoutSec !== undefined) { const t = Number(b.timeoutSec); if (!(t >= 5 && t <= 300)) throw httpErr(400, 'GPL timeout must be between 5 and 300 seconds.'); next.timeoutSec = Math.round(t); }
+    for (const t of ['uat', 'prod']) { const e = (b.envs || {})[t]; if (!e) continue;
+      const base = String(e.base || '').trim().replace(/\/+$/, ''), p = String(e.path || '/transactions/{uuid}/receipt').trim();
+      if (base && !/^https?:\/\/[^\s/]+$/i.test(base)) throw httpErr(400, `${t.toUpperCase()} GPL address must look like https://host`);
+      if (!/^\/[\w\-./{}]*\{uuid\}[\w\-./{}]*$/.test(p)) throw httpErr(400, 'The path must start with / and contain {uuid}, for example /transactions/{uuid}/receipt');
+      next.envs[t] = { base, path: p }; }
+    if (!next.envs[next.env].base) throw httpErr(400, `Add the ${next.env.toUpperCase()} GPL address before making it the live one.`);
+    await store.setSetting('gpl', next); gpl.reset && gpl.reset();
+    log(req, 'setting', 'admin', `Updated GPL connection (hub uses ${next.env.toUpperCase()}, timeout ${next.timeoutSec}s)`);
+    res.json({ gpl: await getGpl(), auth: await gplAuthStatus() });
+  }));
+  app.put('/api/admin/gpl-auth/:env', admin, wrap(async (req, res) => {
+    const env = req.params.env; if (!['uat', 'prod'].includes(env)) throw httpErr(400, 'Environment must be uat or prod.');
+    const c = String((req.body || {}).curl || ''); if (!/^\s*curl\s/i.test(c)) throw httpErr(400, 'That does not look like a curl command.');
+    const p = parseGplCurl(c); if (p.error) throw httpErr(400, p.error);
+    const headers = Q.parseCurlAuth(c);
+    if (!headers.Authorization && !headers.Cookie) throw httpErr(400, 'No login found in that curl. Copy it from the browser as "Copy as cURL" so it includes the authorization header or cookie.');
+    const cur = await getGpl(); cur.envs[env] = { base: p.base, path: p.path }; cur.sampleUuid = p.sampleUuid;
+    await store.setSetting('gpl', cur);
+    await store.setSecret('gpl:' + env, { headers, at: new Date().toISOString(), by: req.user.name });
+    log(req, 'setting', 'admin', `Saved the GPL address and login for ${env.toUpperCase()} (${Object.keys(headers).join(', ')})`);
+    res.json({ gpl: await getGpl(), auth: await gplAuthStatus() });
+  }));
+  app.post('/api/admin/gpl/test', admin, wrap(async (req, res) => {
+    const cfg = await getGpl(), t0 = Date.now();
+    if (!cfg.sampleUuid) return res.json({ ok: false, error: 'Paste a GPL curl first. Its receipt is used for the test.' });
+    try {
+      const g = await gpl.receipt(cfg, cfg.env, cfg.sampleUuid, Math.min(cfg.timeoutSec, 30));
+      log(req, 'setting', 'admin', `Tested GPL on ${cfg.env.toUpperCase()}: ${g ? 'OK' : 'receipt not found'}`);
+      res.json(g ? { ok: true, ms: Date.now() - t0, message: `Working. GPL ${cfg.env.toUpperCase()} answered in ${Date.now() - t0} ms.` } : { ok: false, error: 'GPL answered, but has no receipt for the saved UUID. The address and login work; try a curl for a current receipt.' });
+    } catch (x) { res.json({ ok: false, code: x.code || 'error', error: x.message }); }
+  }));
   app.get('/api/admin/health', admin, wrap(async (req, res) => {
     const conns = await getConnections(), out = {};
-    const au = await authStatus(); for (const env of ['uat', 'prod']) { const c = config.superset[env]; out[env] = { login: au[env].saved || !!(c.user && c.pass) || !!c.token || !!c.cookie, mode: au[env].saved ? 'saved curl' : c.user ? 'service account' : 'none', savedAt: au[env].at || null }; }
-    await store.ping(); res.json({ store: store.kind, superset: out, live: Object.fromEntries(Object.entries(conns).map(([k, c]) => [k, c.env])) });
+    const au = await authStatus(), gau = await gplAuthStatus(); for (const env of ['uat', 'prod']) { const c = config.superset[env]; out[env] = { login: au[env].saved || !!(c.user && c.pass) || !!c.token || !!c.cookie, mode: au[env].saved ? 'saved curl' : c.user ? 'service account' : 'none', savedAt: au[env].at || null }; }
+    await store.ping(); res.json({ store: store.kind, gpl: gau, superset: out, live: Object.fromEntries(Object.entries(conns).map(([k, c]) => [k, c.env])) });
   }));
 
   // custom options built from a Superset dashboard curl

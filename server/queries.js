@@ -9,7 +9,7 @@ function queryString(q) {
   if (d !== undefined && d !== '') p.push('dashboard_id=' + d);
   return p.length ? '?' + p.join('&') : '';
 }
-const DATE_COLS = ['CREATED_DATE', 'LAST_MODIFIED_DATE', 'DOB', 'TRANS_DATE', 'TRANSACTION_DATE'];
+const DATE_COLS = ['CREATED_DATE', 'LAST_MODIFIED_DATE', 'DOB', 'TRANS_DATE', 'TRANSACTION_DATE', 'profile_last_modified'];
 
 // Search values go into Superset filters, and some datasets put them into SQL through Jinja.
 // So only letters, digits, space and @ . _ + - are allowed. Apostrophes, quotes, %, ; etc. are refused.
@@ -47,7 +47,7 @@ function buildBody(q, vals, range) {
   return {
     datasource: { id: ds, type: 'table' }, force: false,
     queries: [{ filters: flt, extras: { having: '', where: '' }, applied_time_extras: {}, columns: q.columns, orderby: ob, annotation_layers: [], row_limit: lim, series_limit: 0, order_desc: true, url_params: {}, custom_params: {}, custom_form_data: {}, post_processing: [], time_offsets: [] }],
-    form_data: { datasource: ds + '__table', viz_type: 'table', slice_id: num(e.slice), url_params: {}, query_mode: 'raw', groupby: [], ...(Object.keys(temporal).length ? { time_grain_sqla: 'P1D', temporal_columns_lookup: temporal } : {}), metrics: [], all_columns: q.columns, percent_metrics: [], adhoc_filters: adhoc, order_by_cols: ob.map((o) => `[${JSON.stringify(o[0])}, ${o[1]}]`), row_limit: lim, server_page_length: 10, order_desc: true, table_timestamp_format: 'smart_date', allow_render_html: true, show_cell_bars: true, color_pn: true, comparison_color_scheme: 'Green', comparison_type: 'values', dashboards: dash === undefined ? [] : [dash], extra_form_data: { filters: mk() }, label_colors: {}, shared_label_colors: {}, extra_filters: [], dashboardId: dash, force: false, result_format: 'json', result_type: 'full', include_time: false },
+    form_data: { datasource: ds + '__table', viz_type: 'table', slice_id: num(e.slice), url_params: {}, query_mode: 'raw', groupby: [], time_grain_sqla: 'P1D', temporal_columns_lookup: temporal, metrics: [], all_columns: q.columns, percent_metrics: [], adhoc_filters: adhoc, order_by_cols: ob.map((o) => `[${JSON.stringify(o[0])}, ${o[1]}]`), row_limit: lim, server_page_length: 10, order_desc: true, table_timestamp_format: 'smart_date', allow_render_html: true, show_cell_bars: true, color_pn: true, comparison_color_scheme: 'Green', comparison_type: 'values', dashboards: dash === undefined ? [] : [dash], extra_form_data: mk().length ? { filters: mk() } : {}, label_colors: {}, shared_label_colors: {}, extra_filters: [], dashboardId: dash, force: false, result_format: 'json', result_type: 'full', include_time: false },
     result_format: 'json', result_type: 'full',
   };
 }

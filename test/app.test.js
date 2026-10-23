@@ -8,8 +8,10 @@ const { ensureAdmin } = require('../server/bootstrap');
 const { makeBox, secureStore } = require('../server/crypto-box');
 const A = require('../server/auth');
 const fake = require('./fake-superset');
+const fakeGpl = require('./fake-gpl');
+const { Gpl } = require('../server/gpl');
 
-let F, store, raw, srv, base, superset;
+let F, G, store, raw, srv, base, superset;
 const config = { sessionHours: 12, idleMinutes: 120, secureCookie: false, trustProxy: false, adminEmail: 'boss@example.com', adminName: 'Boss', adminPassword: 'Correct-Horse-1', historyKeepMinutes: 30,
   superset: { uat: {}, prod: {} } };
 const CURL = "curl 'http://127.0.0.1/api/v1/chart/data' -H 'Content-Type: application/json' -H 'Cookie: session=abc; other=1' -H 'X-CSRFToken: csrf1' -H 'Authorization: Bearer tok1' --data '{}'";
@@ -27,18 +29,21 @@ class Client {
 async function signedIn(email = 'boss@example.com', pw = 'Correct-Horse-1') { const c = new Client(); const r = await c.post('/api/auth/login', { email, password: pw }); assert.equal(r.status, 200); return c; }
 
 test.before(async () => {
-  F = await fake.start(0, { slowMs: 4000 });
+  F = await fake.start(0, { slowMs: 4000 }); G = await fakeGpl.start();
   raw = memoryStore(); const box = makeBox('test-key-123'); A.setPepper(box.pepper); store = secureStore(raw, box); await store.init(); await ensureAdmin(store, config);
   // point the connections at the fake
   const conns = {};
-  for (const [k, ds] of Object.entries({ 'search.lookup': 76, 'txns.lookup': 74, 'txns.history': 73 })) conns[k] = { envs: { uat: { base: 'http://127.0.0.1:' + F.port, datasource: ds } } };
+  for (const [k, ds] of Object.entries({ 'search.lookup': 76, 'txns.lookup': 74, 'txns.history': 73, 'gpl.lookup': 70, 'fees.rules': 71, 'limits.rules': 77 })) conns[k] = { envs: { uat: { base: 'http://127.0.0.1:' + F.port, datasource: ds } } };
   await store.setSetting('connections', conns);
+  await store.setSetting('gpl', { envs: { uat: { base: 'http://127.0.0.1:' + G.port } } });
+  await store.setSecret('gpl:uat', { headers: { Authorization: 'Basic dGVzdDp0ZXN0', Cookie: '_juice_ex_key=good' }, at: 'x' });
   await store.setSecret('superset:uat', { headers: { Cookie: 'session=abc', 'X-CSRFToken': 'csrf1', Authorization: 'Bearer tok1' }, at: 'x', by: 'test' });
   superset = new Superset(config.superset, (env) => store.getSecret('superset:' + env), async (env, headers) => { const cur = (await store.getSecret('superset:' + env)) || {}; await store.setSecret('superset:' + env, { ...cur, headers }); });
-  const app = createApp({ store, superset, config });
+  const gplc = new Gpl((env) => store.getSecret('gpl:' + env));
+  const app = createApp({ store, superset, config, gpl: gplc });
   await new Promise((r) => { srv = app.listen(0, '127.0.0.1', r); }); base = 'http://127.0.0.1:' + srv.address().port;
 });
-test.after(async () => { srv.close(); await F.close(); });
+test.after(async () => { srv.close(); await F.close(); await G.close(); });
 
 test('login: wrong password, missing CSRF header, forced password change', async () => {
   const c = new Client();
@@ -213,4 +218,83 @@ test('a renewed session cookie from Superset is kept, and the test button report
   await admin.put('/api/admin/superset-auth/uat', { curl: CURL.replace('tok1', 'old') });
   const bad = await admin.post('/api/admin/connections/search.lookup/test'); assert.equal(bad.data.ok, false); assert.equal(bad.data.code, 'auth_expired');
   await admin.put('/api/admin/superset-auth/uat', { curl: CURL });
+});
+
+const U1 = '7bcea5b1-9ab3-49fc-8e73-e39b5887b3c4', U2 = '14702560-cc3c-11f0-9bb5-b02628171946';
+test('GPL: transaction ID -> Superset row -> GPL receipt, serial / UUID / amount checks, duplicate UUIDs', async () => {
+  const admin = await signedIn('boss@example.com', 'Another-Long-Pass-2');
+  let r = await admin.post('/api/gpl/lookup', { value: '20376942462079' });
+  assert.equal(r.status, 200); assert.equal(r.data.rows.length, 1);
+  let c = r.data.checks[0];
+  assert.equal(c.uuid, U1); assert.equal(c.gpl.reference, U1); assert.equal(c.gpl.meter, 'temp_6523'); assert.equal(c.gpl.name, 'TEST CUSTOMER');
+  assert.deepEqual(c.compare, { uuid: 'match', serial: 'match', amount: 'match_cents' }); assert.equal(c.isDuplicate, false);
+  r = await admin.post('/api/gpl/lookup', { value: '20376942462080' }); c = r.data.checks[0];
+  assert.equal(c.isDuplicate, true); assert.equal(c.dupCount, 2); assert.deepEqual(c.dupTransactionIds.sort(), ['20376942462080', '20376942462081']);
+  assert.equal(c.compare.serial, 'differ'); // meter-777 in Superset, meter-999 at GPL
+  r = await admin.post('/api/gpl/lookup', { value: U2 }); assert.equal(r.data.kind, 'uuid'); assert.equal(r.data.rows.length, 2); assert.equal(r.data.checks[0].isDuplicate, true);
+  r = await admin.post('/api/gpl/lookup', { value: '20376942462082' }); c = r.data.checks[0];
+  assert.equal(c.gpl, null); assert.equal(c.compare.uuid, 'not_found');
+  r = await admin.post('/api/gpl/lookup', { value: '99999999999' }); assert.equal(r.data.rows.length, 0); assert.equal(r.data.checks.length, 0);
+  assert.equal((await admin.post('/api/gpl/lookup', { value: "1' or '1'='1" })).status, 400);
+  assert.ok(G.calls.at(-1).headers.authorization.startsWith('Basic '));
+});
+
+test('GPL: an expired GPL login still shows the Superset result, with a clear message', async () => {
+  const admin = await signedIn('boss@example.com', 'Another-Long-Pass-2');
+  await store.setSecret('gpl:uat', { headers: { Authorization: 'Basic dGVzdDp0ZXN0', Cookie: '_juice_ex_key=stale' }, at: 'x' });
+  const r = await admin.post('/api/gpl/lookup', { value: '20376942462079' });
+  assert.equal(r.status, 200); assert.equal(r.data.rows.length, 1); assert.equal(r.data.checks[0].gplCode, 'auth_expired'); assert.match(r.data.checks[0].gplError, /fresh GPL curl/);
+  await store.setSecret('gpl:uat', { headers: { Authorization: 'Basic dGVzdDp0ZXN0', Cookie: '_juice_ex_key=good' }, at: 'x' });
+});
+
+test('GPL: admin pastes the GPL curl; address, path and login are saved, login stays encrypted', async () => {
+  const admin = await signedIn('boss@example.com', 'Another-Long-Pass-2');
+  const curl = `curl --url 'http://127.0.0.1:${G.port}/transactions/${U1}/receipt' -H 'accept: text/html' -H 'authorization: Basic dGVzdDp0ZXN0' -b '_juice_ex_key=good' -H 'user-agent: Mozilla/5.0'`;
+  assert.equal((await admin.put('/api/admin/gpl-auth/uat', { curl: "curl 'http://x/y'" })).status, 400);
+  const ok = await admin.put('/api/admin/gpl-auth/uat', { curl }); assert.equal(ok.status, 200);
+  assert.equal(ok.data.gpl.envs.uat.path, '/transactions/{uuid}/receipt'); assert.equal(ok.data.gpl.sampleUuid, U1);
+  assert.deepEqual(ok.data.auth.uat.headers.sort(), ['Authorization', 'Cookie', 'User-Agent']);
+  assert.ok(!JSON.stringify(ok.data).includes('dGVzdDp0ZXN0'));
+  assert.ok(!JSON.stringify(await raw.getSetting('secret:gpl:uat')).includes('dGVzdDp0ZXN0'));
+  assert.equal((await admin.post('/api/admin/gpl/test')).data.ok, true);
+  assert.equal((await admin.put('/api/admin/gpl', { timeoutSec: 2 })).status, 400);
+  assert.equal((await admin.put('/api/admin/gpl', { timeoutSec: 45 })).status, 200);
+  assert.equal((await admin.put('/api/admin/gpl', { envs: { prod: { base: 'https://x.example.com', path: '/no-uuid' } } })).status, 400);
+});
+
+test('GPL: needs the gpl permission', async () => {
+  const c = await signedIn('c@example.com', 'Carleane-Pass-123');
+  assert.equal((await c.post('/api/gpl/lookup', { value: '20376942462079' })).status, 403);
+});
+
+test('Fees & Commissions and Thresholds & Limits: options from Superset, exact-match filters, permissions', async () => {
+  const admin = await signedIn('boss@example.com', 'Another-Long-Pass-2');
+  let r = await admin.get('/api/ref/fees/options'); assert.equal(r.status, 200);
+  assert.deepEqual(r.data.options.service_name, ['AGENT_TOPUP', 'COLLECT_PAY']);
+  r = await admin.post('/api/ref/fees/query', { filters: { service_name: 'COLLECT_PAY' } }); assert.equal(r.data.rows.length, 2);
+  r = await admin.post('/api/ref/fees/query', { filters: { service_name: 'COLLECT_PAY', SENDER_PROFILE: 'MMGAgent' } }); assert.equal(r.data.rows.length, 0);
+  r = await admin.post('/api/ref/fees/query', { filters: {} }); assert.equal(r.data.rows.length, 3);
+  assert.equal((await admin.post('/api/ref/fees/query', { filters: { service_name: "x' OR 1=1 --" } })).status, 400); // only values Superset listed are accepted
+  r = await admin.post('/api/ref/limits/query', { filters: { PROFILE_NAME: 'Biller', service_display_name: 'Bill Payment' } });
+  assert.equal(r.data.rows.length, 1); assert.equal(r.data.rows[0].max_send_amt, '$1,000,000');
+  assert.equal((await admin.get('/api/ref/nope/options')).status, 404);
+  const c = await signedIn('c@example.com', 'Carleane-Pass-123');
+  assert.equal((await c.get('/api/ref/fees/options')).status, 403); // Agent has no fees access
+  const a = await admin.get('/api/admin/audit?limit=50'); assert.ok(a.data.events.some((e) => /Fees & Commissions: service_name = COLLECT_PAY/.test(e.detail)));
+});
+
+test('a wrong curl pasted into a connection cannot break its search fields; reset restores the defaults', async () => {
+  const admin = await signedIn('boss@example.com', 'Another-Long-Pass-2');
+  const saved = await store.getSetting('connections');
+  const before = JSON.parse(JSON.stringify(saved));
+  saved['search.lookup'] = { ...saved['search.lookup'], searchCols: ['MOBILE_NUMBER', 'USER_NAME'], columns: ['USER_ID'], dateCol: 'CREATED_DATE' };
+  await store.setSetting('connections', saved);
+  let c = (await admin.get('/api/admin/connections')).data.connections['search.lookup'];
+  assert.equal(c.searchCols.length, 7); // fixed by the app
+  assert.equal((await admin.put('/api/admin/connections/search.lookup', { searchCols: ['EMAIL_ID'], timeoutSec: 60 })).status, 200);
+  c = (await admin.get('/api/admin/connections')).data.connections['search.lookup']; assert.equal(c.searchCols.length, 7);
+  const r = await admin.del('/api/admin/connections/search.lookup'); assert.equal(r.status, 200);
+  assert.equal(r.data.columns.length, 18); assert.equal(r.data.dateCol, ''); assert.equal(r.data.envs.uat.datasource, 76);
+  assert.equal((await admin.del('/api/admin/connections/nope')).status, 404);
+  await store.setSetting('connections', before); // put the test servers back
 });

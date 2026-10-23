@@ -35,3 +35,22 @@ test('search request filters and query string', () => {
   assert.equal(Q.queryString(c), '?form_data=%7B%22slice_id%22%3A83%7D&dashboard_id=103');
   assert.equal(b.datasource.id, 76);
 });
+
+test('GPL superset request equals the real one', () => {
+  const c = conn('gpl.lookup'), r = real('gpl-superset.curl');
+  const mine = Q.buildBody(c, { TRANSACTION_ID: ['20376942462079'], UUID: ['14702560-cc3c-11f0-9bb5-b02628171946'] }, 'No filter');
+  assert.deepEqual(mine.queries[0], r.queries[0]);
+  for (const k of Object.keys(r.form_data).filter((x) => x !== 'all_columns')) assert.deepEqual(mine.form_data[k], r.form_data[k], 'form_data.' + k);
+  assert.equal(Q.queryString(c), '?form_data=%7B%22slice_id%22%3A71%7D&dashboard_id=94');
+});
+
+test('fees request equals the real one (no filters) and limits request equals the real one (profile + service)', () => {
+  const cf = conn('fees.rules'), rf = real('fees.curl'), mf = Q.buildBody({ ...cf, envs: { ...cf.envs, uat: { ...cf.envs.uat, rowLimit: 1000 } } }, {}, 'No filter');
+  assert.deepEqual(mf.queries[0], rf.queries[0]);
+  for (const k of Object.keys(rf.form_data).filter((x) => x !== 'all_columns')) assert.deepEqual(mf.form_data[k], rf.form_data[k], 'fees form_data.' + k);
+  assert.equal(Q.queryString(cf), '?form_data=%7B%22slice_id%22%3A72%7D&dashboard_id=95');
+  const cl = conn('limits.rules'), rl = real('limits.curl'), ml = Q.buildBody(cl, { PROFILE_NAME: ['Biller'], service_display_name: ['Bill Payment'] }, 'No filter');
+  assert.deepEqual(ml.queries[0], rl.queries[0]);
+  for (const k of Object.keys(rl.form_data).filter((x) => x !== 'all_columns')) assert.deepEqual(ml.form_data[k], rl.form_data[k], 'limits form_data.' + k);
+  assert.equal(Q.queryString(cl), '?form_data=%7B%22slice_id%22%3A84%7D&dashboard_id=104');
+});

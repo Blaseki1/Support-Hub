@@ -1,7 +1,7 @@
 # Support Hub
 
 Internal hub: per-person logins and permissions, an audit log, and lookups that read from Superset
-(Search Hub, Transaction History with Excel download; the other modules are placeholders until their curls are added).
+Modules: Search Hub, Fees & Commissions, Transaction History (Excel download), Thresholds & Limits (with wallet capacity) and the GPL Token Checker. Pending Giftcards is a placeholder until its curl is added.
 
 ## Set it up, step by step
 
@@ -36,6 +36,14 @@ Internal hub: per-person logins and permissions, an audit log, and lookups that 
 4. Click **Test** on a connection card to check the address, IDs and login. A green message means it works; a red one says what is wrong. The server also keeps the renewed session cookie Superset sends back, so a login lasts longer when it is in use.
 5. A browser login expires. When a search says "Superset rejected the saved login", paste a fresh curl the same way.
 
+**5b. Connect GPL receipts (GPL Token Checker)**
+1. In your browser, open one GPL receipt page, then in developer tools (Network) right-click the page request and choose **Copy as cURL**.
+2. In **Data Sources**, open the **GPL receipts** card, choose Edit connection, paste the curl and click **Save address and login from curl**. This saves the address and path (the UUID in the address becomes `{uuid}`) and the login (authorization header and cookie), encrypted.
+3. Click **Test** on the card. A green message means GPL answered with a receipt.
+4. If GPL later sends you to its login page, the saved login has expired: paste a fresh curl the same way.
+
+**How the GPL Token Checker works:** enter a Transaction ID (or a UUID). The hub finds it in Superset, asks GPL for the receipt with the same UUID, compares UUID, serial number (Superset `Serial_number` against the GPL receipt's Meter) and amount (Superset is treated as cents when it equals the GPL total x 100), and looks for other Superset transactions that share the UUID.
+
 **6. Add your people**
 Users & Permissions > Add person. Give them the temporary password shown once. They must change it at first sign-in. Switch export, download and each module on or off per person.
 
@@ -51,8 +59,10 @@ Tests: `npm test`.
 - Not encrypted: user ids, roles, permissions, timestamps, IP addresses and which module was used.
 - Sessions use a random token; only its hash is stored. Cookie is HttpOnly and SameSite=Strict. Five wrong passwords lock that email+IP for 15 minutes.
 - Permissions are checked on the server on every request. Excel download is enforced server-side; CSV export of on-screen results is only enforced in the page.
+- GPL logins (the Basic authorization header and cookie) are stored encrypted like the Superset login. Anyone who pasted such a curl into a chat or ticket should change that GPL password.
+- Fees and Limits dropdowns only accept values Superset itself listed; nothing typed is sent into a query.
 - Search values may contain letters, numbers, spaces and `@ . _ + -` only.
 - "Match all" in Search Hub filters the Superset result on the server (the dataset itself matches any filled field). A row-limit warning shows if Superset hits its limit.
 
 ## Not covered yet
-Fees, Limits, Giftcards and GPL modules (waiting on their curls), MFA, deleted-account images.
+Pending Giftcards (waiting on its curl), the reversal diagnostic that was in the first Fees mock-up (needs its own dataset), MFA, deleted-account images.
