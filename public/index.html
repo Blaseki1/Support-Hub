@@ -1,0 +1,1423 @@
+<title>Support Hub</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0,0&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: fixed left rail of modules + admin, slim top bar, one working pane. Login is a full-screen gate. */
+:root{
+  --bg:#e9e9e7; --surface:#ffffff; --surface2:#f1f1ef; --line:#c9c9c4; --fg:#111111; --muted:#4d4d4a;
+  --accent:#ffc800; --accent-fg:#111111; --accent-soft:#fff0a8; --accent-ink:#7a5a00;
+  --rail:#111111; --rail-fg:#f1f1ee; --rail-muted:#9a9a94; --rail-hover:#222222;
+  --on-good:#ffffff; --good:#0f7a36; --good-soft:#d3f1de; --warn:#b34700; --warn-soft:#ffe1c4; --on-bad:#ffffff; --bad:#b3180f; --bad-soft:#fcd9d5; --info:#1f5fbf; --info-soft:#d8e6fb;
+  --shadow:0 1px 2px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.08);
+  --f-display:'Bricolage Grotesque','IBM Plex Sans',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c0c0c; --surface:#1a1a1a; --surface2:#242424; --line:#3d3d3a; --fg:#f4f4f1; --muted:#b4b4ae;
+  --accent:#ffd21f; --accent-fg:#111111; --accent-soft:#3a3200; --accent-ink:#ffd21f;
+  --rail:#000000; --rail-fg:#f4f4f1; --rail-muted:#9a9a94; --rail-hover:#1c1c1c;
+  --on-good:#06210f; --good:#5ee08a; --good-soft:#12361f; --warn:#ffa05c; --warn-soft:#432000; --on-bad:#2a0a07; --bad:#ff8f86; --bad-soft:#4a1b17; --info:#7fb0ff; --info-soft:#14284a;
+  --shadow:0 1px 2px rgba(0,0,0,.6),0 6px 18px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c0c0c; --surface:#1a1a1a; --surface2:#242424; --line:#3d3d3a; --fg:#f4f4f1; --muted:#b4b4ae;
+  --accent:#ffd21f; --accent-fg:#111111; --accent-soft:#3a3200; --accent-ink:#ffd21f;
+  --rail:#000000; --rail-fg:#f4f4f1; --rail-muted:#9a9a94; --rail-hover:#1c1c1c;
+  --on-good:#06210f; --good:#5ee08a; --good-soft:#12361f; --warn:#ffa05c; --warn-soft:#432000; --on-bad:#2a0a07; --bad:#ff8f86; --bad-soft:#4a1b17; --info:#7fb0ff; --info-soft:#14284a;
+  --shadow:0 1px 2px rgba(0,0,0,.6),0 6px 18px rgba(0,0,0,.5); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* icons */
+.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;width:1em;overflow:hidden;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;vertical-align:middle;flex:none}
+.ms.lg{font-size:30px}
+.btn .ms{font-size:18px;margin-right:4px}
+/* login */
+.gate2{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px max(16px,env(safe-area-inset-left,0px));background-color:#101010;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:44px 44px;color:#f1f1ee}
+.g2card{width:100%;max-width:440px;padding:28px;display:grid;gap:16px;border-top:6px solid var(--accent);color:var(--fg)}
+.g2top{display:flex;gap:14px;align-items:center}
+.g2top .logo{width:52px;height:52px;border-radius:14px}
+.g2top .logo .ms{font-size:30px}
+.g2top b{font-family:var(--f-display);font-size:22px}
+.acct{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}
+.acct:hover,.acct:focus-visible{border-color:var(--fg)}
+.acct .avatar{width:30px;height:30px}
+.acct .rl{margin-left:auto}
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.picker label{cursor:pointer;position:relative}
+.picker input{position:absolute;opacity:0}
+.picker span.pk{display:grid;place-items:center;width:40px;height:40px;border:2px solid var(--line);border-radius:10px;background:var(--surface)}
+.picker input:checked+span.pk{background:var(--accent);border-color:var(--fg);color:var(--accent-fg)}
+.picker input:focus-visible+span.pk{outline:3px solid var(--info);outline-offset:2px}
+.gate{min-height:100%;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.gate-art{background:var(--accent);color:var(--accent-fg);padding:48px max(32px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.gate-art h1{font-size:clamp(32px,4.4vw,54px);line-height:1.02;max-width:12ch}
+.gate-art .logo{background:var(--accent-fg)!important;color:var(--accent)!important}.gate-art ul{list-style:none;padding:0;margin:0;display:grid;gap:10px;font-family:var(--f-mono);font-size:12.5px;opacity:.9}
+.gate-art li::before{content:"› ";}
+.gate-form{display:flex;align-items:center;justify-content:center;padding:32px max(20px,env(safe-area-inset-right,0px))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.login-card{width:100%;max-width:400px;padding:28px;display:grid;gap:16px}
+.login-card h2{font-size:24px}
+.field{display:grid;gap:6px}
+.field label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.inp{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+.inp{border-color:#8d8d88}.inp:focus{border-color:var(--fg)}
+.btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--surface2)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:6px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.demo-users{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:4px 10px;font-size:12px}
+.chip:hover{border-color:var(--fg)}
+.err{color:var(--bad);font-size:13px;min-height:18px}
+
+/* shell */
+.shell{height:100%;display:grid;grid-template-columns:248px minmax(0,1fr);grid-template-rows:56px minmax(0,1fr)}
+.rail{grid-row:1/3;background:var(--rail);color:var(--rail-fg);display:flex;flex-direction:column;min-height:0;overflow:auto}
+.brand{color:var(--rail-fg);height:56px;display:flex;align-items:center;gap:10px;padding:0 18px;font-family:var(--f-display);font-weight:700;font-size:18px;flex:none}
+.logo{width:28px;height:28px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:var(--accent-fg);font-size:14px;font-weight:700}
+.nav{padding:6px 10px 16px;display:grid;gap:2px}
+.nav h4{margin:16px 8px 4px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--rail-muted);font-weight:600}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--rail-fg);text-decoration:none;cursor:pointer}
+.nav a:hover{background:var(--rail-hover)}
+.nav a.on{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.nav a .ico{width:22px;display:grid;place-items:center;opacity:.95}
+.nav a .lock{margin-left:auto;color:var(--rail-muted);display:grid}.nav a .lock .ms{font-size:16px}
+.top{display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--surface);min-width:0}
+.menu-btn{display:none}
+.gsearch{flex:1;max-width:460px;display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 11px;color:var(--muted);cursor:pointer;min-width:0}
+.gsearch kbd{margin-left:auto;font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.top .sp{flex:1}
+.who{display:flex;align-items:center;gap:10px;position:relative}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:600;font-size:12px;flex:none}
+.pop{position:absolute;right:0;top:44px;width:260px;padding:14px;display:grid;gap:10px;z-index:30}
+.main{overflow:auto;padding:24px max(24px,env(safe-area-inset-right,0px));min-width:0}
+.page{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-h h2{font-size:28px}
+.page-h p{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:500;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface2);color:var(--muted)}
+.pill.accent{background:var(--accent-soft);color:var(--accent-ink)}.pill.info{background:var(--info-soft);color:var(--info)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* home tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.tile{padding:18px;display:grid;gap:8px;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--fg);transform:translateY(-1px)}
+.tile .ti{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-family:var(--f-mono);font-weight:500}
+.tile h3{font-size:17px}
+.tile p{margin:0;color:var(--muted);font-size:13px}
+.tile.locked{opacity:.55;cursor:not-allowed}
+.tile.locked:hover{transform:none;border-color:var(--line)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.panel{padding:18px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.panel h3{font-size:16px}
+
+/* forms + tools */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.toolbar .field{flex:1 1 180px;min-width:0}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface2);padding:4px;border-radius:10px;width:fit-content;max-width:100%}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;color:var(--muted);font-weight:500}
+.tabs button.on{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg);font-weight:600;padding:11px 14px;background:var(--surface2);border-bottom:2px solid var(--fg);white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--line);vertical-align:middle}
+tr.click:hover td{background:var(--surface2);cursor:pointer}
+td.r,th.r{text-align:right}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.kv div span{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kv div b{font-weight:500;word-break:break-word}
+.bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.warn i{background:var(--warn)} .bar.bad i{background:var(--bad)}
+.timeline{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.timeline li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:12px;padding-bottom:16px;position:relative}
+.timeline li::before{content:"";position:absolute;left:5px;top:14px;bottom:0;width:2px;background:var(--line)}
+.timeline li:last-child::before{display:none}
+.timeline .nd{width:12px;height:12px;border-radius:50%;background:var(--accent);margin-top:4px;border:2px solid var(--surface);box-shadow:0 0 0 2px var(--accent)}
+.timeline .nd.bad{background:var(--bad);box-shadow:0 0 0 2px var(--bad)}
+.timeline .nd.warn{background:var(--warn);box-shadow:0 0 0 2px var(--warn)}
+.timeline .nd.off{background:var(--surface);box-shadow:0 0 0 2px var(--line)}
+.diag{padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bad-soft);color:var(--fg);display:grid;gap:4px}
+.diag b{color:var(--bad)}
+.src{border:1px dashed var(--line);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface2)}
+.empty{padding:36px;text-align:center;color:var(--muted)}
+.switch{position:relative;width:62px;height:30px;flex:none;display:inline-block}
+.switch input{opacity:0;position:absolute;inset:0;margin:0;cursor:pointer;z-index:1;width:100%;height:100%}
+.switch i{position:absolute;inset:0;border-radius:8px;border:2px solid var(--bad);background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:12.5px;letter-spacing:.06em}
+.switch i::before{content:"OFF"}
+.switch input:checked+i{background:var(--good);border-color:var(--good);color:var(--on-good)}
+.switch input:checked+i::before{content:"✓ ON"}
+.switch input:focus-visible+i{outline:3px solid var(--info);outline-offset:2px}
+.switch input:disabled+i{opacity:.4}
+.perm{position:relative;width:46px;height:38px;display:inline-block}
+.perm input{opacity:0;position:absolute;inset:0;margin:0;cursor:pointer;z-index:1;width:100%;height:100%}
+.perm i{position:absolute;inset:0;border-radius:8px;border:2px solid var(--bad);background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-style:normal;overflow:hidden;transition:transform .1s}
+.perm i::before{content:"close";font-family:"Material Symbols Outlined";font-weight:600;font-size:22px;font-feature-settings:"liga"}
+.perm input:checked+i{background:var(--good);border-color:var(--good);color:var(--on-good)}
+.perm input:checked+i::before{content:"check"}
+.perm:hover i{transform:scale(1.06)}
+.perm input:focus-visible+i{outline:3px solid var(--info);outline-offset:2px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.legend span{display:inline-flex;gap:8px;align-items:center}
+.legend .perm{width:28px;height:24px}.legend .perm i::before{font-size:18px}
+.legend .perm{pointer-events:none}
+.matrix td{padding-block:8px}
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.matrix .switch{margin:0 auto}
+.cmd-bg{position:fixed;inset:0;background:rgba(10,16,24,.5);display:grid;place-items:start center;padding:12vh 16px;z-index:50}
+.cmd{width:100%;max-width:540px;overflow:hidden}
+.cmd input{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:14px 16px;background:transparent;width:100%}
+.cmd ul{list-style:none;margin:0;padding:6px;max-height:320px;overflow:auto}
+.cmd li{padding:9px 12px;border-radius:8px;cursor:pointer;display:flex;gap:10px;align-items:center}
+.cmd li:hover,.cmd li.sel{background:var(--accent);color:var(--accent-fg)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:60;box-shadow:var(--shadow)}
+.code{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:var(--f-mono);font-size:12px;overflow-x:auto;white-space:pre}
+.mask{filter:blur(5px);transition:filter .15s}
+.mask:hover{filter:none}
+
+
+/* login v3 */
+.g3{min-height:100%;display:grid;grid-template-rows:auto 1fr auto;background:var(--bg)}
+.g3bar{display:flex;align-items:center;gap:12px;padding:18px max(24px,env(safe-area-inset-left,0px));font-family:var(--f-display);font-weight:700;font-size:18px}
+.g3mid{display:grid;place-items:center;padding:16px max(16px,env(safe-area-inset-left,0px)) 32px}
+.g3card{--surface:#1b1b1b;--surface2:#262626;--line:#4d4d49;--fg:#f4f4f1;--muted:#b9b9b3;width:100%;max-width:420px;background:#111;color:var(--fg);border-radius:18px;padding:34px 30px;display:grid;gap:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.g3card .inp{background:var(--surface);color:var(--fg);border-color:#5d5d58;padding:11px 12px}
+.g3card .inp:focus{border-color:#ffc800;box-shadow:0 0 0 3px rgba(255,200,0,.25)}
+.g3card .btn{background:#ffc800;color:#111;padding:12px 16px;font-size:15px}
+.g3card .btn.ghost{background:transparent;color:var(--fg);border:1px solid #5d5d58}
+.g3card h2{font-size:28px}
+.g3ring{width:64px;height:64px;border-radius:50%;background:#ffc800;color:#111;display:grid;place-items:center}
+.g3ring .ms{font-size:32px}
+.g3foot{padding:16px max(24px,env(safe-area-inset-left,0px)) 20px;color:var(--muted);font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+.g3foot span{display:inline-flex;gap:6px;align-items:center}
+.g3foot .ms{font-size:17px}
+/* shared bits */
+.pi{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;flex:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.stat{padding:16px 18px;display:flex;gap:14px;align-items:center}
+.stat .si{width:46px;height:46px;border-radius:12px;background:var(--fg);color:var(--bg);display:grid;place-items:center;flex:none}
+.stat b{font-family:var(--f-display);font-size:28px;line-height:1;display:block}
+.stat span.l{color:var(--muted);font-size:13px}
+/* permissions */
+.permgrid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.plist{display:grid;gap:6px;padding:12px;align-content:start}
+.pitem{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px;border:2px solid transparent;border-radius:10px;background:transparent}
+.pitem:hover{background:var(--surface2)}
+.pitem.on{border-color:var(--fg);background:var(--accent-soft)}
+.pitem .meta{min-width:0;flex:1}
+.pitem .meta b,.pitem .meta span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0 8px;border-bottom:2px solid var(--fg);flex-wrap:wrap}
+.pgh h3{font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--f-body);font-weight:700}
+.prow{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.prow .pt{flex:1 1 220px;min-width:0}
+.prow .pt b{display:block}
+.pctl{display:flex;gap:14px;flex-wrap:wrap}
+.pc{display:grid;gap:3px}
+.pc small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 11px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button:hover:not([disabled]){background:var(--surface2)}
+.seg button.yes.on{background:var(--good);color:var(--on-good)}
+.seg button.no.on{background:var(--bad);color:var(--on-bad)}
+.seg button[disabled]{opacity:.4;cursor:not-allowed}
+.seg .ms{font-size:16px;width:16px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:700;font-size:13px}
+.srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.srccard{padding:16px;display:grid;gap:12px}
+@media (max-width:860px){.permgrid{grid-template-columns:minmax(0,1fr)}}
+
+@media (max-width:860px){
+  .gate{grid-template-columns:1fr}
+  .gate-art{padding-block:28px}
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:40;transform:translateX(-102%);transition:transform .2s;padding-left:env(safe-area-inset-left,0px)}
+  .rail.open{transform:none;box-shadow:var(--shadow)}.rail .chip{background:var(--rail-hover);border-color:#444;color:var(--rail-fg)}
+  .rail{grid-row:auto}
+  .menu-btn{display:inline-flex}
+  .main{padding-inline:max(16px,env(safe-area-inset-left,0px))}
+  .top{padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+  .who .nm{display:none}
+  .gsearch kbd{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div id="app"></div>
+<div id="overlay"></div>
+<div id="toasts"></div>
+<script>window.__HUB_LIVE__=true</script>
+<script>
+/* ========== live mode ==========
+   In the exported project the server sets window.__HUB_LIVE__ and every data call goes to /api. In the hosted preview it is off and the page uses sample data. */
+const LIVE=!!window.__HUB_LIVE__;
+async function api(method,url,body,opts){
+ const r=await fetch(url,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-Requested-With':'hub'},body:body===undefined?undefined:JSON.stringify(body),signal:opts&&opts.signal});
+ let d=null;try{d=await r.json()}catch(e){}
+ if(!r.ok){
+  const err=new Error((d&&d.error)||('Request failed ('+r.status+')'));err.status=r.status;err.code=d&&d.code;
+  if(r.status===401&&!(opts&&opts.noAuthRedirect)&&S.user){S.user=null;S.cache={};renderLogin('Your session ended. Sign in again.')}
+  throw err;
+ }
+ return d;
+}
+/* ========== data & state ========== */
+const ic=(n,c='')=>`<span class="ms ${c}" aria-hidden="true">${n}</span>`;
+const MODULES=[
+ {id:'search',name:'Search Hub',ico:'search',desc:'Find accounts by ID card, username, MSISDN, name or email.'},
+ {id:'fees',name:'Fees & Commissions',ico:'percent',desc:'Fee breakdown per transaction and why a reversal did not happen.'},
+ {id:'txns',name:'Transaction History',ico:'receipt_long',desc:'Find an account, pull its transactions for a period and download them as Excel.'},
+ {id:'limits',name:'Fee, Threshold & Limits',ico:'speed',desc:'Check what an account can send, receive and what it will cost.'},
+ {id:'giftcards',name:'Pending Giftcards',ico:'redeem',desc:'Giftcard orders that have not completed, with age and cause.'},
+ {id:'gpl',name:'GPL Token Checker',ico:'key',desc:'Look up a GPL token, its state and linked account.'}
+];
+const SPECIAL=[
+ {id:'dl_images',name:'Download deleted-account images',ico:'photo_library',desc:'Download the ID and selfie images kept on deleted accounts.'},
+ {id:'unmask',name:'See full ID card and TIN numbers',ico:'visibility',desc:'Show the whole number instead of only the last 3 digits.'}
+];
+const ADMIN=[
+ {id:'users',name:'Users & Permissions',ico:'group'},
+ {id:'options',name:'Hub Options',ico:'dashboard_customize'},
+ {id:'audit',name:'Audit Log',ico:'history'},
+ {id:'sessions',name:'Active Sessions',ico:'devices'},
+ {id:'sources',name:'Data Sources',ico:'database'}
+];
+const EXP=m=>'export:'+m;
+const DEFAULT_PERMS={
+ Admin:[...MODULES.map(m=>m.id),...MODULES.map(m=>EXP(m.id)),...SPECIAL.map(x=>x.id),'admin'],
+ Supervisor:[...MODULES.map(m=>m.id),...MODULES.map(m=>EXP(m.id)),'unmask'],
+ Agent:['search','txns','giftcards']
+};
+let USERS=[
+ {id:'u1',name:'Carlos Rose',email:'carlosrose94@gmail.com',role:'Admin',perms:[...DEFAULT_PERMS.Admin],status:'active',mfa:true,last:'Today 18:02'},
+ {id:'u2',name:'Carleane Dos Santos',email:'carleane@example.com',role:'Agent',perms:['search','txns','giftcards','dl_images'],status:'active',mfa:true,last:'Today 17:41'},
+ {id:'u3',name:'Marcus Hinds',email:'marcus@example.com',role:'Supervisor',perms:[...DEFAULT_PERMS.Supervisor],status:'active',mfa:false,last:'Yesterday 16:20'},
+ {id:'u4',name:'Priya Singh',email:'priya@example.com',role:'Agent',perms:['search','giftcards','gpl'],status:'active',mfa:true,last:'Mon 11:05'},
+ {id:'u5',name:'Devon Ali',email:'devon@example.com',role:'Agent',perms:['search'],status:'disabled',mfa:false,last:'12 Oct 09:14'}
+];
+let SESSIONS=[
+ {id:'s1',uid:'u2',device:'Chrome · Windows',ip:'10.4.2.17',since:'17:41',seen:'1 min ago'},
+ {id:'s2',uid:'u3',device:'Safari · macOS',ip:'10.4.2.30',since:'16:55',seen:'12 min ago'}
+];
+let AUDIT=[
+ {t:'17:44:10',uid:'u2',act:'search',mod:'search',detail:'Name: "Joel Persaud"'},
+ {t:'17:43:02',uid:'u2',act:'search',mod:'search',detail:'TIN: ***-**-419'},
+ {t:'17:41:55',uid:'u2',act:'login',mod:'auth',detail:'Signed in from 10.4.2.17'},
+ {t:'16:58:31',uid:'u3',act:'view',mod:'fees',detail:'Transaction TXN-88213 fee breakdown'},
+ {t:'16:55:04',uid:'u3',act:'login',mod:'auth',detail:'Signed in from 10.4.2.30'}
+];
+const S={mask:false,open:[],user:null,session:null,route:'home',sel:{},cache:{},tab:{},navOpen:false,popOpen:false,filters:{}};
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const can=p=>!!S.user&&S.user.perms.includes(p);
+const uname=id=>(USERS.find(u=>u.id===id)||{name:id}).name;
+const now=()=>new Date().toLocaleTimeString('en-GB');
+const money=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const initials=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+const hash=s=>[...String(s)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+const pick=(arr,seed)=>arr[((seed%arr.length)+arr.length)%arr.length];
+const pillFor=s=>({
+ Success:'good',Completed:'good',Active:'good',Delivered:'good',Verified:'good',
+ Pending:'warn',Processing:'warn','On hold':'warn','Expiring':'warn',
+ Failed:'bad',Reversed:'neutral',Deleted:'bad',Expired:'bad',Rejected:'bad',Used:'neutral',Terminated:'bad',Failure:'bad',Suspended:'warn',Blocked:'bad',Inactive:'neutral',InActive:'warn'
+}[s]||'neutral');
+const pill=s=>`<span class="pill ${pillFor(s)}"><span class="dot"></span>${esc(s)}</span>`;
+function maskV(v){v=String(v);if(can('unmask')&&!S.mask)return v;return v.length<=3?'***':'•'.repeat(v.length-3)+v.slice(-3)}
+
+function log(act,mod,detail){
+ if(LIVE){
+  if(['open','download','export'].includes(act))fetch('/api/audit/event',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Requested-With':'hub'},body:JSON.stringify({act,mod,detail})}).catch(()=>{});
+  return;
+ }
+ AUDIT.unshift({t:now(),uid:S.user?S.user.id:'—',act,mod,detail});
+ if(S.route==='audit')renderView();
+}
+function toast(msg){
+ const el=document.createElement('div');el.className='toast';el.textContent=msg;
+ $('#toasts').appendChild(el);setTimeout(()=>el.remove(),2600);
+}
+function setTheme(t){
+ if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme');
+ try{t?localStorage.setItem('hub-theme',t):localStorage.removeItem('hub-theme')}catch(e){}
+}
+try{const t=localStorage.getItem('hub-theme');if(t)setTheme(t)}catch(e){}
+
+/* ========== auth ========== */
+function renderLogin(err=''){
+ $('#app').innerHTML=`
+ <div class="g3">
+  <div class="g3bar"><span class="logo">${ic('hub')}</span>Support Hub</div>
+  <div class="g3mid">
+   <form class="g3card" id="loginForm" autocomplete="off">
+    <div class="g3ring">${ic('lock')}</div>
+    <div><h2>${S.open.length?'Add another account':'Welcome back'}</h2>
+     <div class="muted" style="margin-top:4px">${S.open.length?`${S.open.length} account${S.open.length>1?'s':''} stay signed in while you do this.`:'Sign in with your own account to continue.'}</div></div>
+    <div class="field"><label for="em">Email</label><input class="inp" id="em" type="email" value="${LIVE?'':'carlosrose94@gmail.com'}" required autocomplete="username"></div>
+    <div class="field"><label for="pw">Password</label><input class="inp" id="pw" type="password" value="${LIVE?'':'demo-password'}" required autocomplete="current-password"></div>
+    <div class="err" id="lerr" style="color:#ff8f86">${esc(err)}</div>
+    <button class="btn" type="submit">${ic('login')}Sign in</button>
+    ${S.open.length?`<button class="btn ghost" type="button" id="backBtn">${ic('arrow_back')}Back to the hub</button>`:''}
+    <div class="muted" style="font-size:13px;text-align:center">Forgot your password? Ask an admin to reset it.</div>
+   </form>
+  </div>
+  <div class="g3foot"><span>${ic('shield')}Your own session</span><span>${ic('history')}Searches are logged</span><span>${ic('key')}Access set by your admin</span><span class="mono" style="margin-left:auto">${LIVE?'':'Demo build · sample data'}</span></div>
+ </div>`;
+ $$('[data-em]').forEach(b=>b.onclick=()=>{$('#em').value=b.dataset.em});
+ $('#loginForm').onsubmit=LIVE?liveLogin:e=>{
+  e.preventDefault();
+  const u=USERS.find(x=>x.email.toLowerCase()===$('#em').value.trim().toLowerCase());
+  if(!u)return renderLogin('No account found for that email.');
+  if(u.status==='disabled')return renderLogin('This account is disabled. Ask an admin to re-enable it.');
+  const have=S.open.find(o=>o.user.id===u.id);
+  if(have)return switchTo(have);
+  saveCurrent();
+  const entry={user:u,route:'home',session:{id:'s'+Date.now()+Math.floor(Math.random()*999),uid:u.id,device:'This browser',ip:'10.4.2.99',since:now().slice(0,5),seen:'now'}};
+  u.last='Today '+now().slice(0,5);
+  S.open.push(entry);SESSIONS.unshift(entry.session);
+  S.user=u;S.session=entry.session;S.route='home';
+  log('login','auth','Signed in from 10.4.2.99 (own session, other sessions unaffected)');
+  renderShell();
+ };
+ const back=$('#backBtn');if(back)back.onclick=()=>switchTo(S.open[S.open.length-1]);
+}
+async function liveLogin(e){
+ e.preventDefault();const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+ try{
+  await api('POST','/api/auth/login',{email:$('#em').value.trim(),password:$('#pw').value},{noAuthRedirect:true});
+  await liveStart();
+ }catch(x){renderLogin(x.message)}
+}
+async function liveStart(){
+ const b=await api('GET','/api/bootstrap',undefined,{noAuthRedirect:true});
+ applyBootstrap(b);
+ if(b.user.mustChange)return renderChangePw(true);
+ S.route='home';renderShell();
+}
+function applyBootstrap(b){
+ S.user=b.user;S.session={id:'me'};S.recent=b.recent||[];S.searchCount=b.searchCount||0;
+ for(let i=MODULES.length-1;i>=0;i--)if(MODULES[i].custom)MODULES.splice(i,1);
+ (b.options||[]).forEach(o=>{MODULES.push({id:o.id,name:o.name,ico:o.ico,desc:o.desc,custom:true,fields:o.fields,curl:o.url?('curl '+o.url):''});SRC[o.id]='Superset · custom dashboard'});
+ Object.entries((b.settings||{}).connections||{}).forEach(([k,c])=>{if(SUP[k])Object.assign(SUP[k],{env:c.env,timeoutSec:c.timeoutSec,minChars:c.minChars,searchCols:c.searchCols})});
+}
+function liveBoot(){
+ api('GET','/api/bootstrap',undefined,{noAuthRedirect:true}).then(b=>{applyBootstrap(b);if(b.user.mustChange)renderChangePw(true);else renderShell()}).catch(()=>renderLogin());
+}
+function renderChangePw(forced){
+ $('#app').innerHTML=`<div class="g3"><div class="g3bar"><span class="logo">${ic('hub')}</span>Support Hub</div><div class="g3mid">
+  <form class="g3card" id="pwForm" autocomplete="off"><div class="g3ring">${ic('key')}</div>
+   <div><h2>${forced?'Set a new password':'Change password'}</h2><div class="muted" style="margin-top:4px">${forced?'Your admin gave you a temporary password. Choose your own to continue.':'Use at least 10 characters.'}</div></div>
+   <div class="field"><label for="pc">Current password</label><input class="inp" id="pc" type="password" required autocomplete="current-password"></div>
+   <div class="field"><label for="pn1">New password (10 characters or more)</label><input class="inp" id="pn1" type="password" required minlength="10" autocomplete="new-password"></div>
+   <div class="field"><label for="pn2">Repeat new password</label><input class="inp" id="pn2" type="password" required minlength="10" autocomplete="new-password"></div>
+   <div class="err" id="perr" style="color:#ff8f86"></div>
+   <button class="btn" type="submit">${ic('save')}Save password</button>
+   ${forced?`<button class="btn ghost" type="button" id="pout">Sign out</button>`:`<button class="btn ghost" type="button" id="pback">${ic('arrow_back')}Back</button>`}
+  </form></div><div class="g3foot"></div></div>`;
+ const po=$('#pout');if(po)po.onclick=logout;const pb=$('#pback');if(pb)pb.onclick=renderShell;
+ $('#pwForm').onsubmit=async e=>{
+  e.preventDefault();
+  if($('#pn1').value!==$('#pn2').value){$('#perr').textContent='The two new passwords do not match.';return}
+  try{await api('POST','/api/auth/change-password',{current:$('#pc').value,next:$('#pn1').value});toast('Password changed.');await liveStart()}catch(x){$('#perr').textContent=x.message}
+ };
+}
+/* Several people can be signed in at once. Each has their own session and place in the app; nobody is signed out by someone else signing in. */
+function saveCurrent(){const cur=S.open.find(o=>o.session===S.session);if(cur)cur.route=S.route}
+function switchTo(entry){
+ saveCurrent();S.user=entry.user;S.session=entry.session;S.route=entry.route||'home';S.popOpen=false;S.navOpen=false;S.mask=false;renderShell();
+}
+function closeEntry(entry){
+ S.open=S.open.filter(o=>o!==entry);SESSIONS=SESSIONS.filter(s=>s.id!==entry.session.id);
+}
+function logout(){
+ if(LIVE){api('POST','/api/auth/logout',undefined,{noAuthRedirect:true}).catch(()=>{}).finally(()=>{S.user=null;S.session=null;S.popOpen=false;S.navOpen=false;S.cache={};S.filters={};S.sel={};renderLogin()});return}
+ log('logout','auth','Signed out');
+ const cur=S.open.find(o=>o.session===S.session);closeEntry(cur);S.popOpen=false;S.navOpen=false;
+ if(S.open.length){const n=S.open[S.open.length-1];S.user=n.user;S.session=n.session;S.route=n.route||'home';S.mask=false;toast('Signed out. Switched to '+n.user.name.split(' ')[0]);renderShell()}
+ else{S.user=null;S.session=null;renderLogin()}
+}
+function addAccount(){saveCurrent();S.popOpen=false;renderLogin('')}
+
+/* ========== shell ========== */
+function navLink(id,name,ico,locked){
+ return `<a data-go="${id}" class="${S.route===id?'on':''}" ${locked?'title="You do not have access"':''}><span class="ico">${ic(ico)}</span>${esc(name)}${locked?`<span class="lock">${ic('lock')}</span>`:''}</a>`;
+}
+function renderShell(){
+ $('#app').innerHTML=`
+ <div class="shell">
+  <aside class="rail ${S.navOpen?'open':''}" id="rail">
+   <div class="brand"><span class="logo">${ic('hub')}</span>Support Hub</div>
+   <nav class="nav">
+    ${navLink('home','Home','home',false)}
+    <h4>Modules</h4>
+    ${MODULES.map(m=>navLink(m.id,m.name,m.ico,!can(m.id))).join('')}
+    ${can('admin')?`<h4>Administration</h4>${ADMIN.map(a=>navLink(a.id,a.name,a.ico,false)).join('')}`:''}
+   </nav>
+  </aside>
+  <header class="top">
+   <button class="btn ghost sm menu-btn" id="menuBtn" aria-label="Open menu">${ic('menu')}</button>
+   <div class="gsearch" id="gs" role="button" tabindex="0">${ic('search')}Jump to a module or search a customer <kbd>Ctrl K</kbd></div>
+   <span class="sp"></span>
+   <div class="who">
+    <div class="avatar">${esc(initials(S.user.name))}</div>
+    <div class="nm" style="line-height:1.2"><b>${esc(S.user.name)}</b><br><span class="muted" style="font-size:12px">${esc(S.user.role)}</span></div>
+    <button class="btn ghost sm" id="who">Account</button>
+    ${S.popOpen?`<div class="card pop">
+      <div><b>${esc(S.user.name)}</b><div class="muted" style="font-size:12px">${esc(S.user.email)}</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span>Mask ID numbers</span><label class="switch"><input type="checkbox" id="maskSw" ${S.mask?'checked':''} ${can('unmask')?'':'disabled'}><i></i></label></div>
+      <div style="display:flex;gap:6px"><button class="btn ghost sm" data-theme="light">Light</button><button class="btn ghost sm" data-theme="dark">Dark</button><button class="btn ghost sm" data-theme="">Auto</button></div>
+      ${LIVE?'<button class="btn ghost sm" id="chPw">Change password</button>':`<div style="display:grid;gap:6px"><span class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase">Signed in on this browser</span>
+       ${S.open.map(o=>`<button class="btn ghost sm" data-sw="${o.session.id}" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>${esc(o.user.name)}</span><span class="muted">${o.session===S.session?'current':'switch'}</span></button>`).join('')}
+       <button class="btn ghost sm" id="addAcc">Add another account</button></div>`}
+      <div style="display:flex;gap:6px"><button class="btn danger sm" id="out">Sign out</button>${LIVE?'':'<button class="btn ghost sm" id="outAll">Sign out all</button>'}</div></div>`:''}
+   </div>
+  </header>
+  <main class="main"><div class="page" id="view"></div></main>
+ </div>`;
+ $$('[data-go]').forEach(a=>a.onclick=()=>go(a.dataset.go));
+ $('#menuBtn').onclick=()=>{S.navOpen=!S.navOpen;$('#rail').classList.toggle('open',S.navOpen)};
+ $('#gs').onclick=openCmd;
+ $('#who').onclick=()=>{S.popOpen=!S.popOpen;renderShell()};
+ if(S.popOpen){
+  $('#out').onclick=logout;
+  const aa=$('#addAcc');if(aa)aa.onclick=addAccount;
+  const cpw=$('#chPw');if(cpw)cpw.onclick=()=>renderChangePw(false);
+  const oa=$('#outAll');if(oa)oa.onclick=()=>{S.open.slice().forEach(o=>{S.user=o.user;S.session=o.session;log('logout','auth','Signed out (all accounts)');closeEntry(o)});S.user=null;S.session=null;S.popOpen=false;renderLogin()};
+  $$('[data-sw]').forEach(b=>b.onclick=()=>{const e=S.open.find(o=>o.session.id===b.dataset.sw);if(e&&e.session!==S.session)switchTo(e);else{S.popOpen=false;renderShell()}});
+  const ms=$('#maskSw');ms.onchange=()=>{S.mask=ms.checked;log('setting','auth','Mask '+(S.mask?'on':'off'));renderView()};
+  $$('[data-theme]').forEach(b=>b.onclick=()=>setTheme(b.dataset.theme||null));
+ }
+ renderView();
+}
+function go(r){
+ if(MODULES.some(m=>m.id===r)&&!can(r))return toast('You do not have access to that module.');
+ if(ADMIN.some(m=>m.id===r)&&!can('admin'))return toast('Admins only.');
+ S.route=r;S.navOpen=false;S.popOpen=false;
+ if(r!=='home')log('open',r,'Opened '+(([...MODULES,...ADMIN].find(x=>x.id===r)||{}).name||r));
+ renderShell();
+}
+/* Admin pages load their data from the server first in live mode. */
+const fmtStamp=ts=>{const d=new Date(ts);return isNaN(d)?'':`${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${d.toLocaleTimeString('en-GB')}`};
+const agoStr=ts=>{const m=Math.max(0,Math.round((Date.now()-new Date(ts))/60000));return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
+const mapSession=x=>({id:x.id,uid:x.uid,uname:x.uname,device:x.device,ip:x.ip,since:fmtStamp(x.createdAt),seen:agoStr(x.lastSeen),current:!!x.current});
+const LOADERS={
+ users:async()=>{const [u,s]=await Promise.all([api('GET','/api/admin/users'),api('GET','/api/admin/sessions')]);USERS=u.users;SESSIONS=s.sessions.map(mapSession)},
+ sessions:async()=>{const s=await api('GET','/api/admin/sessions');SESSIONS=s.sessions.map(mapSession)},
+ audit:async()=>{const [u,a]=await Promise.all([api('GET','/api/admin/users'),api('GET','/api/admin/audit?limit=500')]);USERS=u.users;AUDIT=a.events.map(e=>({t:fmtStamp(e.ts),uid:e.uid,un:e.uname,act:e.act,mod:e.mod,detail:e.detail,ip:e.ip}))},
+ sources:async()=>{const c=await api('GET','/api/admin/connections');SUPAUTH=c.auth||{};Object.entries(c.connections).forEach(([k,v])=>{SUP[k]=v})},
+ options:async()=>{const o=await api('GET','/api/admin/options');for(let i=MODULES.length-1;i>=0;i--)if(MODULES[i].custom)MODULES.splice(i,1);o.options.forEach(x=>{MODULES.push({id:x.id,name:x.name,ico:x.ico,desc:x.desc,custom:true,fields:x.fields,curl:x.url?('curl '+x.url):''});SRC[x.id]='Superset · custom dashboard'})}
+};
+function drawView(){
+ const v=$('#view');if(!v)return;
+ const fn=VIEWS[S.route]||(MODULES.some(m=>m.id===S.route&&m.custom)?customView:VIEWS.home);v.innerHTML='';v.dataset.r=S.route;fn(v);
+}
+function renderView(){
+ const ld=LIVE&&LOADERS[S.route],route=S.route,v=$('#view');
+ if(!ld)return drawView();
+ if(v&&v.dataset.r!==route)v.innerHTML='<div class="card empty">Loading…</div>';
+ ld().then(()=>{if(S.route===route)drawView()}).catch(e=>{const w=$('#view');if(w&&S.route===route)w.innerHTML=`<div class="diag"><b>Could not load this page</b><span>${esc(e.message)}</span></div>`});
+}
+</script>
+<script>
+/* ========== shared bits ========== */
+const FIRST=['Joel','Amrita','Devika','Keon','Shanice','Marlon','Tiana','Ravi','Aaliyah','Gavin','Nadia','Leroy'];
+const LAST=['Persaud','Williams','Singh','Hinds','Bacchus','Fraser','Ramdin','Thomas','Narine','Cummings'];
+const fullName=s=>pick(FIRST,s)+' '+pick(LAST,s>>3);
+const SRC={search:'Superset · customer search',fees:'Superset · fees_commissions',txns:'Superset · transactions',limits:'Superset · limits_config',giftcards:'Superset · giftcards_pending',gpl:'Superset · gpl_tokens'};
+function head(title,sub,mod){
+ const mm=MODULES.find(m=>m.id===mod)||{ico:'dashboard'};
+ return `<div class="page-h"><div style="display:flex;gap:14px;align-items:center"><span class="pi" style="background:var(--accent);color:var(--accent-fg);width:50px;height:50px;border-radius:13px">${ic(mm.ico,'lg')}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div></div>
+ <div class="pill neutral" title="Live queries will run through Superset once the curl for this module is added"><span class="dot"></span>${esc(SRC[mod])} · sample data</div></div>`;
+}
+function exportBtn(mod){return can('export:'+mod)?`<button class="btn ghost sm" data-export>${ic('download')}Export CSV</button>`:`<button class="btn ghost sm" disabled title="Ask an admin for export access">${ic('lock')}Export CSV</button>`}
+function wireExport(root,mod,get){const b=$('[data-export]',root);if(b)b.onclick=()=>{if(get){const f=get();return saveFile(f.filename,f.data,mod,f.detail)}log('export',mod,'Exported current results');toast('Export started (demo)')}}
+function tabsHtml(list,cur){return `<div class="tabs">${list.map(([k,l])=>`<button data-tab="${k}" class="${k===cur?'on':''}">${l}</button>`).join('')}</div>`}
+
+/* ========== views ========== */
+const VIEWS={};
+
+VIEWS.home=v=>{
+ const hr=new Date().getHours();
+ const recent=LIVE?(S.recent||[]).slice(0,4):AUDIT.filter(a=>a.uid===S.user.id&&a.act==='search').slice(0,4);
+ v.innerHTML=`
+ <div class="page-h"><div><h2>${hr<12?'Good morning':hr<18?'Good afternoon':'Good evening'}, ${esc(S.user.name.split(' ')[0])}</h2>
+  <p>Pick a tool. You can see the modules your account has been given; the rest are locked until an admin grants them.</p></div></div>
+ <div class="stats">
+  <div class="card stat"><span class="si">${ic('apps')}</span><div><b>${MODULES.filter(m=>can(m.id)).length}/${MODULES.length}</b><span class="l">modules you can use</span></div></div>
+  <div class="card stat"><span class="si">${ic('manage_search')}</span><div><b>${LIVE?(S.searchCount||0):AUDIT.filter(a=>a.uid===S.user.id&&a.act==='search').length}</b><span class="l">searches this session</span></div></div>
+  <div class="card stat"><span class="si">${ic('download')}</span><div><b>${MODULES.filter(m=>can(EXP(m.id))).length}</b><span class="l">modules you can export from</span></div></div>
+ </div>
+ <div class="tiles">${MODULES.map(m=>{const ok=can(m.id);return `<button class="card tile ${ok?'':'locked'}" data-go="${m.id}">
+  <div class="ti">${ic(m.ico)}</div><h3>${esc(m.name)}</h3><p>${esc(m.desc)}</p>${ok?'':'<span class="pill neutral">No access</span>'}</button>`}).join('')}</div>
+ <div class="two">
+  <div class="card panel"><h3>Your recent searches</h3>
+   ${recent.length?recent.map(r=>`<div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(r.detail)}</span><span class="muted mono">${r.t}</span></div>`).join(''):'<div class="muted">Nothing yet. Your searches in this session will show up here.</div>'}
+  </div>
+  <div class="card panel"><h3>Your access</h3>
+   <div style="display:flex;flex-wrap:wrap;gap:6px">${[...MODULES,...SPECIAL].filter(x=>can(x.id)).concat(MODULES.filter(m=>can(EXP(m.id))).map(m=>({id:m.id,name:'Export · '+m.name}))).map(x=>`<span class="pill accent">${esc(x.name)}</span>`).join('')||'<span class="muted">No permissions assigned.</span>'}</div>
+   <div class="muted" style="font-size:12.5px">Everything you open or search is recorded with your name and the time.</div>
+  </div>
+ </div>`;
+ $$('[data-go]',v).forEach(a=>a.onclick=()=>go(a.dataset.go));
+};
+
+/* ----- Search Hub ----- */
+const maskRaw=v=>v.length<=3?'***':'*'.repeat(v.length-3)+v.slice(-3);
+/* Every filter works on its own. Fill several and choose whether results must match all of them or any of them. */
+const SEARCH_FIELDS=[
+ {k:'ID_NUMBER',label:'ID card number',ph:'e.g. R1309454',g:'Identity'},
+ {k:'USER_NAME',label:'Username',ph:'e.g. 6010256',g:'Identity'},
+ {k:'MOBILE_NUMBER',label:'MSISDN',ph:'e.g. 5926010256',g:'Identity'},
+ {k:'FIRST_NAME',label:'First name',ph:'e.g. Carlos',g:'Name'},
+ {k:'Middle_name',label:'Middle name',ph:'e.g. Shamar',g:'Name'},
+ {k:'LAST_NAME',label:'Last name',ph:'e.g. Ross',g:'Name'},
+ {k:'EMAIL_ID',label:'Email',ph:'e.g. name@example.com',g:'Contact'}
+];
+function synthAccount(seed,v){
+ v=v||{};const k=hash(seed);
+ const un=v.USER_NAME||(v.MOBILE_NUMBER?String(v.MOBILE_NUMBER).replace(/^592/,''):String(6000000+k%999999));
+ return {USER_ID:String(100000+k%899999),PARTNER_ID:String(200000+(k>>>3)%799999),STATUS:pick(['Active','Active','InActive','Terminated'],k>>>2),Account_type:pick(['Customer','Customer','Customer','Merchant','Agent'],k>>>5),
+  USER_NAME:un,MOBILE_NUMBER:v.MOBILE_NUMBER||('592'+un),FIRST_NAME:v.FIRST_NAME||pick(FIRST,k),Middle_name:v.Middle_name||null,LAST_NAME:v.LAST_NAME||pick(LAST,k>>>3),
+  DOB:Date.UTC(1965+k%38,k%12,1+k%27),EMAIL_ID:v.EMAIL_ID||('user'+un+'@example.com'),CREATED_DATE:Date.UTC(2019+k%7,k%12,1+(k>>>4)%27),CREATED_BY:'initial_load',LAST_MODIFIED_DATE:null,LAST_MODIFIED_BY:null,
+  IDENTIFICATION_TYPE:pick(['Nationalid','Licence','Passport'],k>>>6),ID_NUMBER:v.ID_NUMBER||(pick(['R','D','P'],k>>>7)+String(1000000+k%8999999)),PLACE_OF_ISSUE:null};
+}
+/* Preview stand-in. The exported project calls the server, which calls Superset. */
+function synthSearch(vals){
+ const s=hash(JSON.stringify(vals)),unique=['ID_NUMBER','USER_NAME','MOBILE_NUMBER','EMAIL_ID'].some(c=>vals[c]);
+ const n=unique?1:1+s%3;
+ return Array.from({length:n},(_,i)=>synthAccount(s+'a'+i,i===0?vals:{...vals,USER_NAME:undefined,MOBILE_NUMBER:undefined,ID_NUMBER:undefined,EMAIL_ID:undefined}));
+}
+async function searchRows(vals,match){
+ if(LIVE)return api('POST','/api/search',{filters:vals,match});
+ await new Promise(r=>setTimeout(r,450));
+ return {rows:synthSearch(vals),total:null,truncated:false,env:SUP['search.lookup'].env,at:now(),match};
+}
+VIEWS.search=v=>{
+ const q=SUP['search.lookup'],fields=SEARCH_FIELDS.filter(f=>q.searchCols.includes(f.k));
+ const st=S.filters.search||(S.filters.search={vals:{},match:'all',status:[],type:'All',idt:'All',text:'',open:[]});
+ const groups=[...new Set(fields.map(f=>f.g))];
+ v.innerHTML=head('Search Hub','Find an account by ID card, username, MSISDN, name or email. Use one filter or combine them.','search')+`
+ <form class="card panel" id="sf" autocomplete="off">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">${groups.map(g=>`<div style="display:grid;gap:10px;align-content:start"><div class="muted" style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">${g}</div>${fields.filter(f=>f.g===g).map(f=>`<div class="field"><label for="sx_${f.k}">${esc(f.label)}</label><input class="inp" id="sx_${f.k}" value="${esc(st.vals[f.k]||'')}" placeholder="${esc(f.ph)}"></div>`).join('')}</div>`).join('')}</div>
+  <div class="toolbar" style="align-items:center">
+   <div class="field" style="flex:0 1 auto"><label>When more than one is filled</label><div class="tabs"><button type="button" data-m="all" class="${st.match==='all'?'on':''}">Match all</button><button type="button" data-m="any" class="${st.match==='any'?'on':''}">Match any</button></div></div>
+   <span style="flex:1"></span><button class="btn ghost" type="button" id="sclr">Clear</button><button class="btn" type="submit">${ic('search')}Search</button></div>
+  <div class="muted" style="font-size:13px"><b>Match all</b> keeps only accounts that fit every filled field. <b>Match any</b> also shows accounts that fit just one. Each field needs at least ${q.minChars} characters and matches part of a value.</div>
+  <div class="err" id="serr"></div></form>
+ <div id="sres"></div>`;
+
+ const res=()=>S.cache.search;
+ const filtered=()=>{const r=res();if(!r)return [];const tx=st.text.toLowerCase();
+  return r.rows.filter(x=>(!st.status.length||st.status.includes(x.STATUS))&&(st.type==='All'||x.Account_type===st.type)&&(st.idt==='All'||x.IDENTIFICATION_TYPE===st.idt)
+   &&(!tx||[x.USER_ID,x.PARTNER_ID,x.USER_NAME,x.MOBILE_NUMBER,x.FIRST_NAME,x.Middle_name,x.LAST_NAME,x.EMAIL_ID,x.ID_NUMBER].join(' ').toLowerCase().includes(tx)))};
+ const fullNm=r=>[r.FIRST_NAME,r.Middle_name,r.LAST_NAME].filter(Boolean).join(' ');
+ const drawTable=()=>{
+  const rows=filtered(),box=$('#stab');if(!box)return;
+  $('#scount').textContent=`${rows.length} of ${res().rows.length} shown`;
+  const canTx=can('txns');
+  box.innerHTML=rows.length?`<div class="tablewrap"><table style="min-width:1080px"><thead><tr><th>Name</th><th>Username</th><th>MSISDN</th><th>Email</th><th>ID</th><th>Account type</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>{const open=st.open.includes(r.USER_ID);return `<tr><td style="min-width:190px"><b>${esc(fullNm(r))}</b><div class="muted mono" style="white-space:nowrap">${esc(r.USER_ID)} · Partner ${esc(r.PARTNER_ID)}</div></td><td class="mono">${esc(r.USER_NAME)}</td><td class="mono">${esc(r.MOBILE_NUMBER||'—')}</td><td>${esc(r.EMAIL_ID||'—')}</td>
+   <td><div>${esc(r.IDENTIFICATION_TYPE||'—')}</div><div class="mono muted">${r.ID_NUMBER?esc(maskV(r.ID_NUMBER)):'—'}</div></td><td>${esc(r.Account_type)}</td><td>${pill(r.STATUS)}</td><td class="num">${fmtDate(r.CREATED_DATE)}</td>
+   <td class="r" style="white-space:nowrap"><button class="btn ghost sm" data-det="${esc(r.USER_ID)}" aria-expanded="${open}">${ic(open?'expand_less':'expand_more')}Details</button> <button class="btn sm" data-tx="${esc(r.USER_ID)}" ${canTx?'':'disabled title="You do not have access to Transaction History"'}>${ic('receipt_long')}Transactions</button></td></tr>
+   ${open?`<tr><td colspan="9" style="background:var(--surface2)"><div class="kv"><div><span>Date of birth</span><b>${fmtDate(r.DOB)}</b></div><div><span>Created by</span><b>${esc(r.CREATED_BY||'—')}</b></div><div><span>Last modified</span><b>${fmtDate(r.LAST_MODIFIED_DATE)}</b></div><div><span>Last modified by</span><b>${esc(r.LAST_MODIFIED_BY||'—')}</b></div><div><span>Place of issue</span><b>${esc(r.PLACE_OF_ISSUE||'—')}</b></div></div>
+    ${/terminat|delet/i.test(r.STATUS)?`<div style="margin-top:12px"><button class="btn ghost sm" ${can('dl_images')?'':'disabled'} data-img="${esc(r.USER_ID)}">${ic(can('dl_images')?'photo_library':'lock')}Deleted-account images</button> <span class="muted" style="font-size:13px">${can('dl_images')?'Turns on once the images query is added.':'Ask an admin for the download images permission.'}</span></div>`:''}</td></tr>`:''}`}).join('')}</tbody></table></div>`
+   :'<div class="card empty">No accounts match these filters.</div>';
+  $$('[data-det]',box).forEach(b=>b.onclick=()=>{const id=b.dataset.det;st.open=st.open.includes(id)?st.open.filter(x=>x!==id):[...st.open,id];drawTable()});
+  $$('[data-tx]',box).forEach(b=>b.onclick=()=>{const r=res().rows.find(x=>x.USER_ID===b.dataset.tx);if(!r)return;S.sel.txnQ=r.USER_NAME;S.sel.txnAuto=r.USER_ID;go('txns')});
+  $$('[data-img]',box).forEach(b=>b.onclick=()=>toast('Waiting for the deleted-account images query.'));
+ };
+ const drawRes=()=>{
+  const box=$('#sres');if(!box)return;const r=res();
+  if(!r){box.innerHTML='<div class="card empty">Fill in one or more fields above to search.</div>';return}
+  const used=Object.entries(r.vals).map(([k,x])=>`${esc((SEARCH_FIELDS.find(f=>f.k===k)||{label:k}).label)}: "${esc(x)}"`).join(' · ');
+  if(!r.rows.length){box.innerHTML=`<div class="card empty"><b>No accounts found</b><div>${used}${Object.keys(r.vals).length>1?` · matching ${r.match==='all'?'all':'any'}`:''}</div></div>`;return}
+  const statuses=[...new Set(r.rows.map(x=>x.STATUS))],types=[...new Set(r.rows.map(x=>x.Account_type))],idts=[...new Set(r.rows.map(x=>x.IDENTIFICATION_TYPE).filter(Boolean))];
+  const cnt=s=>r.rows.filter(x=>x.STATUS===s).length;
+  box.innerHTML=`<div style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr)">
+   ${LIVE?'':'<div class="src"><span><b>Preview data.</b> This page is not connected to Superset here, so these accounts are made up to show the layout.</span></div>'}
+   ${r.truncated?`<div class="diag"><b>Row limit reached</b><span>Superset returned its maximum of ${fmtN(r.limit)} rows, so some matches may be missing. Add more filters to narrow it down.</span></div>`:''}
+   <div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>${r.rows.length} account${r.rows.length===1?'':'s'} found</h3><div class="muted" style="font-size:13px">${used}${Object.keys(r.vals).length>1?` · matching ${r.match==='all'?'all':'any'}`:''} · ${esc(r.env.toUpperCase())} · ${esc(r.at)} · <span id="scount"></span></div></div>${exportBtn('search')}</div>
+   <div class="toolbar"><div class="field" style="flex:2 1 240px"><label>Status</label><div class="picker" style="gap:6px">${statuses.map(x=>`<label><input type="checkbox" data-st="${esc(x)}" ${st.status.includes(x)?'checked':''}><span class="chip" style="display:inline-block;cursor:pointer">${esc(x)} · ${cnt(x)}</span></label>`).join('')}</div></div>
+    <div class="field"><label for="sft">Account type</label><select class="inp" id="sft"><option>All</option>${types.map(t=>`<option ${st.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>
+    <div class="field"><label for="sfi">ID type</label><select class="inp" id="sfi"><option>All</option>${idts.map(t=>`<option ${st.idt===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>
+    <div class="field"><label for="sfx">Find in results</label><input class="inp" id="sfx" value="${esc(st.text)}" placeholder="Anything in the table"></div>
+    <button class="btn ghost" type="button" id="sfc">Clear filters</button></div></div>
+   <div id="stab"></div></div>`;
+  $$('[data-st]',box).forEach(c=>c.onchange=()=>{st.status=c.checked?[...st.status,c.dataset.st]:st.status.filter(x=>x!==c.dataset.st);drawTable()});
+  $('#sft').onchange=e=>{st.type=e.target.value;drawTable()};$('#sfi').onchange=e=>{st.idt=e.target.value;drawTable()};
+  $('#sfx').oninput=e=>{st.text=e.target.value;drawTable()};
+  $('#sfc').onclick=()=>{st.status=[];st.type='All';st.idt='All';st.text='';drawRes()};
+  wireExport(box,'search',()=>{const rows=filtered();
+   return {filename:`search_${new Date().toISOString().slice(0,10)}.csv`,data:toCsv(SEARCH_COLS,rows.map(x=>({...x,ID_NUMBER:x.ID_NUMBER?maskV(x.ID_NUMBER):'',DOB:fmtIso(x.DOB),CREATED_DATE:fmtIso(x.CREATED_DATE),LAST_MODIFIED_DATE:fmtIso(x.LAST_MODIFIED_DATE)}))),detail:`Downloaded ${rows.length} account row(s) from Search Hub`}});
+  drawTable();
+ };
+
+ $$('[data-m]',v).forEach(b=>b.onclick=()=>{st.match=b.dataset.m;$$('[data-m]',v).forEach(x=>x.classList.toggle('on',x===b))});
+ $('#sclr').onclick=()=>{st.vals={};S.cache.search=null;st.status=[];st.type='All';st.idt='All';st.text='';st.open=[];renderView()};
+ $('#sf').onsubmit=async e=>{
+  e.preventDefault();const vals={},err=$('#serr');
+  fields.forEach(f=>{let x=($('#sx_'+f.k).value||'').trim();if(f.k==='MOBILE_NUMBER')x=x.replace(/[\s()+-]/g,'');if(x)vals[f.k]=x});
+  st.vals=vals;
+  if(!Object.keys(vals).length){err.textContent='Fill in at least one field.';return}
+  const short=fields.filter(f=>vals[f.k]&&vals[f.k].length<q.minChars);
+  if(short.length){err.textContent=`${short.map(f=>f.label).join(', ')} needs at least ${q.minChars} characters.`;return}
+  err.textContent='';
+  if(!LIVE)log('search','search','Search: '+Object.entries(vals).map(([k,x])=>`${(SEARCH_FIELDS.find(f=>f.k===k)||{label:k}).label}="${x}"`).join(', ')+(Object.keys(vals).length>1?` (match ${st.match})`:''));
+  $('#sres').innerHTML='<div class="card empty">Searching…</div>';
+  try{
+   const d=await searchRows(vals,st.match);
+   if(S.route!=='search'||!$('#sres'))return;
+   S.cache.search={vals,match:st.match,rows:d.rows,at:d.at||now(),env:d.env||q.env,truncated:!!d.truncated,limit:d.limit};
+   st.status=[];st.type='All';st.idt='All';st.text='';st.open=[];drawRes();
+  }catch(x){if($('#sres'))$('#sres').innerHTML=`<div class="diag"><b>Search failed</b><span>${esc(x.message||'Unknown error')}</span></div>`}
+ };
+ drawRes();
+};
+
+VIEWS.fees=v=>{
+ const q=S.sel.feeQ||'TXN-88213';
+ v.innerHTML=head('Fees & Commissions','Break down every fee and commission on a transaction and find out why it did or did not reverse.','fees')+`
+ <form class="card panel" id="ff"><div class="toolbar"><div class="field"><label for="fq">Transaction ID</label><input class="inp" id="fq" value="${esc(q)}" placeholder="TXN-88213" autocomplete="off"></div><button class="btn" type="submit">Check transaction</button></div></form>
+ <div id="fres"></div>`;
+ const run=()=>{const val=$('#fq').value.trim();if(!val)return;S.sel.feeQ=val;log('search','fees','Transaction '+val);$('#fres').innerHTML=feeResult(val)};
+ $('#ff').onsubmit=e=>{e.preventDefault();run()};run();
+};
+function feeResult(id){
+ const s=hash(id),amt=50+s%950,fee=+(amt*0.015).toFixed(2),comm=+(fee*0.4).toFixed(2),rev=s%3;
+ const st=['Success','Failed','Reversed'][rev];
+ const reasons=[
+  null,
+  ['Debit succeeded but the credit leg timed out at the partner.','Auto-reversal was queued but skipped: the partner returned a non-final status.','Retry window ends in 4 hours. Manual reversal is available to supervisors.'],
+  ['Reversal posted to the wallet.','Fee of '+money(fee)+' was refunded with the principal.','Commission of '+money(comm)+' clawed back from the agent.']];
+ return `<div class="two">
+  <div class="card panel"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${esc(id)}</h3>${pill(st)}</div>
+   <div class="kv"><div><span>Amount</span><b class="num">${money(amt)}</b></div><div><span>Type</span><b>${pick(['Wallet transfer','Cash out','Bill payment'],s)}</b></div><div><span>Initiated</span><b>19 Oct 2026, ${10+s%8}:${10+s%49}</b></div></div>
+   <div class="tablewrap"><table style="min-width:0"><thead><tr><th>Line</th><th class="r">Amount</th></tr></thead><tbody>
+    <tr><td>Principal</td><td class="r num">${money(amt)}</td></tr><tr><td>Service fee (1.5%)</td><td class="r num">${money(fee)}</td></tr>
+    <tr><td>Agent commission</td><td class="r num">${money(comm)}</td></tr><tr><td>Platform margin</td><td class="r num">${money(fee-comm)}</td></tr>
+    <tr><td><b>Customer paid</b></td><td class="r num"><b>${money(amt+fee)}</b></td></tr></tbody></table></div></div>
+  <div class="card panel"><h3>Reversal check</h3>
+   ${rev===1?`<div class="diag"><b>Not reversed</b><span>The transaction failed after the debit. Funds are still held.</span></div>`:`<div class="pill ${rev===2?'neutral':'good'}" style="width:fit-content">${rev===2?'Reversed':'No reversal needed'}</div>`}
+   <ul class="timeline">${(reasons[rev]||['Debit and credit both completed.','No reversal rules triggered.']).map((t,i,a)=>`<li><span class="nd ${rev===1&&i<2?'bad':''}"></span><div>${esc(t)}</div></li>`).join('')}</ul>
+   <div class="muted" style="font-size:12.5px">Reason text is placeholder until the reversal curl is connected.</div></div></div>`;
+}
+</script>
+<script>
+/* ----- Fee, Threshold & Limits ----- */
+const TIERS={Tier1:{day:500,month:5000,single:200,fee:2.0},Tier2:{day:2000,month:20000,single:1000,fee:1.5},Tier3:{day:10000,month:100000,single:5000,fee:1.0}};
+VIEWS.limits=v=>{
+ const f=S.filters.limits||(S.filters.limits={acct:'AC-410298'});
+ v.innerHTML=head('Fee, Threshold & Limits','See the limits on an account, how much is used, and what a transfer of a given size would cost.','limits')+`
+ <form class="card panel" id="lf"><div class="toolbar">
+  <div class="field"><label for="la">Account number</label><input class="inp" id="la" value="${esc(f.acct)}"></div>
+  <div class="field"><label for="lm">Test amount</label><input class="inp" id="lm" type="number" min="1" value="${f.amt||300}"></div>
+  <button class="btn" type="submit">Check limits</button></div></form><div id="lres"></div>`;
+ const run=(logIt)=>{
+  f.acct=$('#la').value.trim();f.amt=+$('#lm').value||0;
+  if(logIt)log('search','limits',`Limits for ${f.acct}, test amount ${f.amt}`);
+  const s=hash(f.acct),tier=pick(['Tier1','Tier2','Tier2','Tier3'],s),t=TIERS[tier];
+  const used={day:Math.round(t.day*((s%80)+10)/100),month:Math.round(t.month*((s%70)+15)/100)};
+  const rows=[['Single transaction',t.single,0],['Daily',t.day,used.day],['Monthly',t.month,used.month]];
+  const fee=+(f.amt*t.fee/100).toFixed(2);
+  const blocked=rows.filter(r=>f.amt>r[1]-r[2]);
+  $('#lres').innerHTML=`<div class="two"><div class="card panel"><div style="display:flex;justify-content:space-between"><h3>${esc(f.acct)}</h3><span class="pill accent">${tier}</span></div>
+  ${rows.map(r=>{const pct=Math.min(100,Math.round(r[2]/r[1]*100));return `<div style="display:grid;gap:4px"><div style="display:flex;justify-content:space-between"><span>${r[0]} limit</span><span class="num muted">${money(r[2])} of ${money(r[1])}</span></div><div class="bar ${pct>85?'bad':pct>65?'warn':''}"><i style="width:${pct}%"></i></div></div>`}).join('')}</div>
+  <div class="card panel"><h3>Test transfer of ${money(f.amt)}</h3>
+   <div class="kv"><div><span>Fee rate</span><b>${t.fee}%</b></div><div><span>Fee</span><b class="num">${money(fee)}</b></div><div><span>Total debit</span><b class="num">${money(f.amt+fee)}</b></div></div>
+   ${blocked.length?`<div class="diag"><b>Would be declined</b><span>Over the ${blocked.map(b=>b[0].toLowerCase()).join(' and ')} limit.</span></div>`:'<span class="pill good" style="width:fit-content"><span class="dot"></span>Within all limits</span>'}
+   <div class="muted" style="font-size:12.5px">Thresholds shown are sample tiers until limits_config is connected.</div></div></div>`;
+ };
+ $('#lf').onsubmit=e=>{e.preventDefault();run(true)};run(false);
+};
+
+/* ----- Pending Giftcards ----- */
+VIEWS.giftcards=v=>{
+ const f=S.filters.gc||(S.filters.gc={provider:'All'});
+ const provs=['Amazon','Google Play','Netflix','Steam','Apple'];
+ const all=Array.from({length:14},(_,i)=>{const k=hash('gc'+i);return {id:'GC-'+(5000+k%999),cust:fullName(k),prov:pick(provs,k>>3),val:pick([10,25,50,100],k>>2),age:1+k%52,
+  cause:pick(['Awaiting provider code','Payment confirmed, code not issued','Provider timeout','Manual review'],k>>4),st:pick(['Pending','Processing','On hold'],k>>6)}});
+ v.innerHTML=head('Pending Giftcards','Orders that are paid but not delivered. Oldest first.','giftcards')+`
+ <div class="toolbar"><div class="field" style="max-width:240px"><label for="gp">Provider</label><select class="inp" id="gp">${['All',...provs].map(p=>`<option ${p===f.provider?'selected':''}>${p}</option>`).join('')}</select></div><span style="flex:1"></span>${exportBtn('giftcards')}</div><div id="gres"></div>`;
+ const draw=()=>{
+  const rows=all.filter(r=>f.provider==='All'||r.prov===f.provider).sort((a,b)=>b.age-a.age);
+  $('#gres').innerHTML=`<div class="tablewrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Provider</th><th class="r">Value</th><th>Waiting</th><th>Cause</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td class="mono">${r.id}</td><td>${esc(r.cust)}</td><td>${r.prov}</td><td class="r num">${money(r.val)}</td><td class="num">${pill(r.age>24?'Expiring':'Pending').replace(/>(Pending|Expiring)</,'>'+r.age+'h<')}</td><td>${r.cause}</td><td>${pill(r.st)}</td></tr>`).join('')}</tbody></table></div>`;
+ };
+ $('#gp').onchange=e=>{f.provider=e.target.value;log('filter','giftcards','Provider: '+f.provider);draw()};
+ wireExport(v,'giftcards');draw();
+};
+
+/* ----- GPL Token Checker ----- */
+VIEWS.gpl=v=>{
+ const q=S.sel.gplQ||'GPL-7F3K-92QD';
+ v.innerHTML=head('GPL Token Checker','Look up a GPL token to see its state, owner and what happened to it.','gpl')+`
+ <form class="card panel" id="gf"><div class="toolbar"><div class="field"><label for="gq">Token</label><input class="inp mono" id="gq" value="${esc(q)}" autocomplete="off"></div><button class="btn" type="submit">Check token</button></div></form><div id="gr"></div>`;
+ const run=(logIt)=>{
+  const val=$('#gq').value.trim();if(!val)return;S.sel.gplQ=val;if(logIt)log('search','gpl','Token '+maskRaw(val));
+  const s=hash(val),st=pick(['Active','Used','Expired','Pending'],s),p=person(val);
+  $('#gr').innerHTML=`<div class="two"><div class="card panel"><div style="display:flex;justify-content:space-between;align-items:center"><h3 class="mono">${esc(val)}</h3>${pill(st)}</div>
+   <div class="kv"><div><span>Value</span><b class="num">${money(20+s%480)}</b></div><div><span>Issued</span><b>${1+s%27} Sep 2026</b></div><div><span>Expires</span><b>${1+s%27} Dec 2026</b></div><div><span>Linked account</span><b class="mono">${p.acct}</b></div><div><span>Holder</span><b>${esc(p.name)}</b></div><div><span>Channel</span><b>${pick(['Agent','App','USSD'],s)}</b></div></div></div>
+   <div class="card panel"><h3>Token events</h3><ul class="timeline">
+    <li><span class="nd"></span><div><b>Issued</b><div class="muted" style="font-size:12.5px">${1+s%27} Sep 2026</div></div></li>
+    <li><span class="nd ${st==='Pending'?'warn':''}"></span><div><b>${st==='Pending'?'Awaiting activation':'Activated'}</b><div class="muted" style="font-size:12.5px">${st==='Pending'?'Not yet confirmed by the customer':'2 days later'}</div></div></li>
+    <li><span class="nd ${st==='Active'||st==='Pending'?'off':st==='Expired'?'bad':''}"></span><div><b>${st==='Used'?'Redeemed':st==='Expired'?'Expired unused':'Not redeemed yet'}</b></div></li></ul></div></div>`;
+ };
+ $('#gf').onsubmit=e=>{e.preventDefault();run(true)};run(false);
+};
+</script>
+<script>
+/* ===== Superset connections (admin editable) ===== */
+const BLANK_ENV=()=>({base:'',datasource:'',slice:'',dashboard:'',rowLimit:1000});
+const LOOKUP_COLS=['USER_ID','PARTNER_ID','STATUS','Account_type','USER_NAME','MOBILE_NUMBER','FIRST_NAME','Name','EMAIL_ID','CREATED_DATE','CREATED_BY','LAST_MODIFIED_DATE','LAST_MODIFIED_BY'];
+const SEARCH_COLS=['USER_ID','PARTNER_ID','STATUS','Account_type','USER_NAME','MOBILE_NUMBER','FIRST_NAME','Middle_name','LAST_NAME','DOB','EMAIL_ID','CREATED_DATE','CREATED_BY','LAST_MODIFIED_DATE','LAST_MODIFIED_BY','IDENTIFICATION_TYPE','ID_NUMBER','PLACE_OF_ISSUE'];
+const HIST_COLS=['TRANSACTION_ID','TRANS_DATE','TRANS_TIME','TRANSACTION_DATE','STATUS_TYPE','SERVICE_NAME','WALLET_ID','WALLET_PARTNER_ID','WALLET_TYPE_ID','WALLET_SIDE','WALLET_NET_AMOUNT','TRANSACTION_AMOUNT','WALLET_BAL_BEFORE','WALLET_BAL_AFTER','OP_COMMISSION','OP_TXN_FEE','DP_TXN_FEE','OP_FEE','DP_FEE','OU_ID','OU_FULLNAME','OU_MSISDN','OP_ID','OP_PARENT_ID','OP_WALLET_ID','OP_MSISDN','OP_WALLET_ACTION','OP_FULL_NAME','DP_ID','DP_PARENT_ID','DP_WALLET_ID','DP_MSISDN','DP_WALLET_ACTION','DP_FULL_NAME','OTHER_USER_MSISDN','OTHER_USER_FULL_NAME','PARTNER_SERVICE_NAME','MASTER_TXN_ID','REMARKS','BILLER_SERVICE_NAME','ACCOUNT_DETAIL','ACCOUNT_DETAIL_2'];
+const SUP={
+ 'search.lookup':{module:'search',label:'Search Hub',desc:'Finds accounts by ID card, username, MSISDN, name or email.',env:'uat',timeoutSec:60,
+  envs:{uat:{base:'http://superset.mmgtest.net:8091',datasource:76,slice:83,dashboard:103,rowLimit:1000},prod:BLANK_ENV()},
+  endpoint:'/api/v1/chart/data',searchCols:['ID_NUMBER','USER_NAME','MOBILE_NUMBER','FIRST_NAME','Middle_name','LAST_NAME','EMAIL_ID'],fixedFilters:[{col:'Account_type',op:'IS NOT NULL'}],dateCol:'',orderBy:[],minChars:3,columns:[...SEARCH_COLS]},
+ 'txns.lookup':{module:'txns',label:'Account lookup',desc:'Finds accounts by username or mobile number.',env:'uat',timeoutSec:60,
+  envs:{uat:{base:'http://superset.mmgtest.net:8091',datasource:74,slice:76,dashboard:99,rowLimit:1000},prod:BLANK_ENV()},
+  endpoint:'/api/v1/chart/data',searchCols:['MOBILE_NUMBER','USER_NAME'],fixedFilters:[],dateCol:'CREATED_DATE',orderBy:[],minChars:4,columns:[...LOOKUP_COLS]},
+ 'txns.history':{module:'txns',label:'Transaction history',desc:'Pulls one account\'s transactions using its Partner ID from the lookup.',env:'uat',timeoutSec:60,
+  envs:{uat:{base:'http://superset.mmgtest.net:8091',datasource:73,slice:79,dashboard:101,rowLimit:50000},prod:{...BLANK_ENV(),rowLimit:50000}},
+  endpoint:'/api/v1/chart/data',searchCols:['WALLET_PARTNER_ID'],fixedFilters:[],dateCol:'TRANS_DATE',orderBy:[['TRANSACTION_DATE',false]],minChars:1,columns:[...HIST_COLS]}
+};
+const supActive=q=>q.envs[q.env];
+const supUrl=q=>{const e=supActive(q);return e.base?e.base.replace(/\/+$/,'')+q.endpoint:''};
+const num=x=>x===''||x==null?undefined:(isNaN(x)?x:Number(x));
+
+/* One box for username or mobile number. A mobile number with the 592 country code is also tried without it, because usernames are stored without it. */
+function variants(raw){
+ const v=String(raw||'').trim(),d=v.replace(/[\s()+-]/g,'');
+ if(/^[\d\s()+-]+$/.test(v)&&/^\d+$/.test(d)){const out=[d];if(d.startsWith('592')&&d.length>=9)out.push(d.slice(3));return out}
+ return v?[v]:[];
+}
+/* Builds the Superset chart/data body. vals is a list used for every search column, or an object {column: [values]} where only the columns present are filtered.
+   fixedFilters (for example Account_type IS NOT NULL) are always added. range is the date filter ("No filter" or "start : end"). */
+function buildBody(q,vals,range){
+ const e=supActive(q),ds=num(e.datasource),dash=num(e.dashboard),lim=Number(e.rowLimit)||1000,rg=range||'No filter',ob=q.orderBy||[];
+ const per=Array.isArray(vals)?Object.fromEntries(q.searchCols.map(c=>[c,vals])):vals;
+ const mk=()=>q.searchCols.filter(c=>per[c]&&per[c].length).map(c=>({col:c,op:'IN',val:[...per[c]]}));
+ const fixed=(q.fixedFilters||[]).map(f=>({col:f.col,op:f.op}));
+ const flt=[...mk(),...fixed];
+ if(q.dateCol)flt.push({col:q.dateCol,op:'TEMPORAL_RANGE',val:rg});
+ const adhoc=[...(q.dateCol?[{clause:'WHERE',comparator:rg,expressionType:'SIMPLE',operator:'TEMPORAL_RANGE',subject:q.dateCol}]:[]),
+  ...fixed.map(f=>({clause:'WHERE',comparator:null,expressionType:'SIMPLE',operator:f.op,operatorId:f.op.replace(/ /g,'_'),sqlExpression:null,subject:f.col}))];
+ return {datasource:{id:ds,type:'table'},force:false,
+  queries:[{filters:flt,extras:{having:'',where:''},applied_time_extras:{},columns:q.columns,orderby:ob,annotation_layers:[],row_limit:lim,series_limit:0,order_desc:true,url_params:{},custom_params:{},custom_form_data:{},post_processing:[],time_offsets:[]}],
+  form_data:{datasource:ds+'__table',viz_type:'table',slice_id:num(e.slice),url_params:{},query_mode:'raw',groupby:[],all_columns:q.columns,percent_metrics:[],
+   adhoc_filters:adhoc,order_by_cols:ob.map(o=>JSON.stringify(o)),row_limit:lim,order_desc:true,dashboards:dash===undefined?[]:[dash],extra_form_data:{filters:mk()},dashboardId:dash,force:false,result_format:'json',result_type:'full'},
+  result_format:'json',result_type:'full'};
+}
+/* Reads a pasted curl and returns the settings in it. The Cookie header is never read. */
+function parseCurl(text){
+ const um=String(text).match(/https?:\/\/[^\s'"\\]+/);if(!um)return {error:'No URL found in that curl.'};
+ let url;try{url=new URL(um[0])}catch(e){return {error:'The URL in that curl is not valid.'}}
+ const i=text.indexOf('--data'),a=text.indexOf('{',i),b=text.lastIndexOf('}');
+ if(i<0||a<0||b<a)return {error:'No JSON body (--data) found in that curl.'};
+ let j;try{j=JSON.parse(text.slice(a,b+1))}catch(e){return {error:'The --data body is not valid JSON.'}}
+ const qq=(j.queries||[])[0]||{},fd=j.form_data||{},fl=qq.filters||[];
+ return {base:url.origin,endpoint:url.pathname,datasource:j.datasource&&j.datasource.id,slice:fd.slice_id,dashboard:fd.dashboardId,
+  rowLimit:qq.row_limit||fd.row_limit,columns:qq.columns||[],orderBy:qq.orderby||[],fixedFilters:fl.filter(f=>!('val' in f)).map(f=>({col:f.col,op:f.op})),searchCols:[...new Set(fl.filter(f=>f.op==='IN').map(f=>f.col))],dateCol:(fl.find(f=>f.op==='TEMPORAL_RANGE')||{}).col||''};
+}
+
+/* ===== files ===== */
+function csvCell(v){v=v==null?'':String(v);if(/^[=+\-@]/.test(v)&&isNaN(v))v="'"+v;return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function toCsv(cols,rows){return '\ufeff'+[cols.map(csvCell).join(','),...rows.map(r=>cols.map(c=>csvCell(r[c])).join(','))].join('\r\n')}
+function blobSave(blob,filename){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+async function downloadServer(url,filename){
+ const r=await fetch(url,{credentials:'same-origin',headers:{'X-Requested-With':'hub'}});
+ if(!r.ok){let m='Download failed';try{m=(await r.json()).error||m}catch(e){}throw new Error(m)}
+ blobSave(await r.blob(),filename);
+}
+const histSummary=rows=>{const ok=rows.filter(r=>r.STATUS_TYPE==='Success').length;return {total:rows.length,ok,bad:rows.length-ok,preview:rows.slice(0,15)}};
+async function saveFile(filename,data,mod,detail){
+ if(LIVE){
+  blobSave(data instanceof Blob?data:new Blob([data],{type:/\.csv$/.test(filename)?'text/csv;charset=utf-8':'application/octet-stream'}),filename);
+  log('download',mod,detail);toast('Saved '+filename);return;
+ }
+ try{
+  const d=await (window.claude&&window.claude.use?window.claude.use('downloads'):null);
+  if(!d){toast('Downloads are not available in this view.');return}
+  await d.save({filename,data});
+  log('download',mod,detail);toast('Saved '+filename);
+ }catch(e){toast(e&&e.code==='declined'?'Download cancelled.':'Could not save the file.')}
+}
+/* Excel workbook: sheet 1 is every column as returned (dates as real Excel dates, IDs and phone numbers as text), sheet 2 says what was pulled. */
+const XL_DATE={TRANS_DATE:'yyyy-mm-dd',TRANSACTION_DATE:'yyyy-mm-dd hh:mm:ss'};
+function buildXlsx(X,cols,rows,info){
+ const ws=X.utils.aoa_to_sheet([cols,...rows.map(r=>cols.map(c=>r[c]==null?null:r[c]))]);
+ rows.forEach((r,i)=>cols.forEach((c,j)=>{const z=XL_DATE[c];if(z&&r[c]!=null){const cell=ws[X.utils.encode_cell({r:i+1,c:j})];if(cell){cell.t='n';cell.v=r[c]/86400000+25569;cell.z=z}}}));
+ ws['!cols']=cols.map(c=>({wch:XL_DATE[c]?19:Math.min(34,Math.max(c.length+2,12))}));
+ ws['!autofilter']={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(rows.length,1),c:cols.length-1}})};
+ const wi=X.utils.aoa_to_sheet(info);wi['!cols']=[{wch:22},{wch:48}];
+ const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Transactions');X.utils.book_append_sheet(wb,wi,'About this file');
+ return X.write(wb,{bookType:'xlsx',type:'array'});
+}
+
+/* ===== Transaction History ===== */
+const SAMPLE_ACCOUNTS=[
+ {USER_ID:'100049',PARTNER_ID:'s444473',STATUS:'Terminated',Account_type:'Customer',USER_NAME:'6800922_1756181101657',MOBILE_NUMBER:'5926800922_1756181101657',FIRST_NAME:'Ronella',Name:'Bannister',EMAIL_ID:'test@gmail.com',CREATED_DATE:1655683200000,CREATED_BY:'initial_load',LAST_MODIFIED_DATE:null,LAST_MODIFIED_BY:null},
+ {USER_ID:'311050',PARTNER_ID:'272937',STATUS:'Active',Account_type:'Agent',USER_NAME:'6800922',MOBILE_NUMBER:'6800922',FIRST_NAME:'Agent',Name:'Bulk',EMAIL_ID:'agentbulk45@testmail.com',CREATED_DATE:1790960594000,CREATED_BY:'310987',LAST_MODIFIED_DATE:null,LAST_MODIFIED_BY:null}
+];
+const lookupDemo=(q,vals)=>{
+ const m=SAMPLE_ACCOUNTS.filter(r=>vals.some(v=>r.USER_NAME.toLowerCase().includes(v.toLowerCase())||String(r.MOBILE_NUMBER).toLowerCase().includes(v.toLowerCase())));
+ if(m.length)return m;
+ const d=(vals[vals.length-1]||'').replace(/^592/,'');
+ return [synthAccount(d,/^\d+$/.test(d)?{USER_NAME:d,MOBILE_NUMBER:'592'+d}:{})].map(a=>({...a,Name:a.LAST_NAME}));
+};
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate=ms=>{if(ms==null||ms==='')return '—';const d=new Date(Number(ms));return isNaN(d)?'—':`${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`};
+const fmtIso=ms=>{if(ms==null||ms==='')return '';const d=new Date(Number(ms));return isNaN(d)?'':d.toISOString().replace('T',' ').slice(0,19)};
+const fmtN=n=>n==null?'—':Number(n).toLocaleString('en-US');
+
+const PERIODS=[['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days'],['mtd','This month'],['lm','Last month'],['180','Last 6 months'],['365','Last 12 months'],['all','All time']];
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function periodRange(k,now0){
+ if(k==='all')return {range:'No filter',from:null,to:null};
+ const t=new Date(now0||Date.now());t.setHours(0,0,0,0);
+ let s=new Date(t),e=new Date(t.getFullYear(),t.getMonth(),t.getDate()+1);
+ if(k==='mtd')s=new Date(t.getFullYear(),t.getMonth(),1);
+ else if(k==='lm'){s=new Date(t.getFullYear(),t.getMonth()-1,1);e=new Date(t.getFullYear(),t.getMonth(),1)}
+ else s=new Date(t.getFullYear(),t.getMonth(),t.getDate()-(Number(k)-1));
+ return {range:`${ymd(s)}T00:00:00 : ${ymd(e)}T00:00:00`,from:s,to:e};
+}
+/* Sample transactions shaped like the real response (same 42 columns). Replaced by live rows once the API is connected. */
+const SVC=['DIRECT_BILL_PAYMENT','CASHIN_BANK','CASH_IN_FOR_AGENT','DIRECT_BILL_PAYMENT_REVERSAL','CASH_OUT_CUSTOMER_INIT','CASH_IN','CASH_OUT_CUSTOMER_IN_APP_FINAL','CASH_OUT_AGENT_INIT'];
+function demoHistory(a,pr){
+ const end=pr.to?pr.to.getTime():Date.now(),start=pr.from?pr.from.getTime():end-365*864e5;
+ const days=Math.max(1,Math.round((end-start)/864e5)),n=Math.min(80,Math.max(6,days*2)),seed=hash(a.PARTNER_ID+pr.range),rows=[];
+ for(let i=0;i<n;i++){
+  const k=hash(seed+'t'+i),tms=start+(k%(days*86400))*1000,d=new Date(tms),k2=hash(k+'x');
+  const r={};HIST_COLS.forEach(c=>r[c]=null);
+  const amt=pick([500,1200,2500,5000,10000,20000,50000],k2>>3),side=pick(['OP','DP'],k2>>5),svc=pick(SVC,k2>>2),ok=k2%9!==0,fee=pick([0,0,20,50],k2>>7);
+  const net=side==='OP'?-(amt+fee):amt;
+  Object.assign(r,{TRANSACTION_ID:String(20400000000000+(k%99999999)),TRANS_DATE:Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()),
+   TRANS_TIME:d.toISOString().slice(11,19),TRANSACTION_DATE:Math.floor(tms/1000)*1000,STATUS_TYPE:ok?'Success':'Failure',SERVICE_NAME:svc,
+   WALLET_ID:String(300000+k2%99999),WALLET_PARTNER_ID:a.PARTNER_ID,WALLET_TYPE_ID:1,WALLET_SIDE:side,WALLET_NET_AMOUNT:ok?net:0,TRANSACTION_AMOUNT:side==='OP'?-amt:amt,
+   OP_FEE:side==='OP'?fee:0,DP_FEE:0,OP_COMMISSION:0,OP_TXN_FEE:0,DP_TXN_FEE:0,OU_FULLNAME:a.FIRST_NAME+' '+a.Name,OU_MSISDN:a.MOBILE_NUMBER,
+   OP_WALLET_ACTION:side==='OP'?'DR':null,DP_WALLET_ACTION:side==='DP'?'CR':null,
+   OTHER_USER_MSISDN:'592'+String(6000000+k2%999999),OTHER_USER_FULL_NAME:fullName(k2),MASTER_TXN_ID:String(20400000000000+(k%99999999)),
+   PARTNER_SERVICE_NAME:svc==='DIRECT_BILL_PAYMENT'?pick(['Internet Payment','Membership Dues'],k2>>9):null});
+  r._net=ok?net:0;rows.push(r);
+ }
+ rows.sort((x,y)=>x.TRANSACTION_DATE-y.TRANSACTION_DATE);
+ let bal=500000;rows.forEach(r=>{r.WALLET_BAL_BEFORE=bal;bal+=r._net;r.WALLET_BAL_AFTER=bal;delete r._net});
+ return rows.reverse();
+}
+/* The page cannot call Superset directly, so this stands in for the call that goes through the server later. It stops when the timeout fires or the person cancels. */
+function fetchHistory(body,rows,signal){
+ return new Promise((res,rej)=>{
+  const t=setTimeout(()=>res(rows),1800);
+  signal.addEventListener('abort',()=>{clearTimeout(t);rej(new Error('aborted'))});
+ });
+}
+
+VIEWS.txns=v=>{
+ const q=SUP['txns.lookup'],h=SUP['txns.history'];
+ if(!Array.isArray((S.filters.txns||{}).status))S.filters.txns={status:[],type:'All',from:'',to:'',text:''};
+ const f=S.filters.txns;
+ const envPill=c=>`<span class="pill ${c.env==='prod'?'accent':'info'}">${c.env.toUpperCase()}</span>`;
+ v.innerHTML=head('Transaction History','Find an account by username or mobile number, then pull its transactions for a period and download them as Excel.','txns')+`
+ <form class="card panel" id="tf"><div class="toolbar">
+  <div class="field" style="flex:2 1 320px"><label for="tq">Username or mobile number</label><input class="inp" id="tq" value="${esc(S.sel.txnQ||'')}" placeholder="e.g. 6800922 or 592 680 0922" autocomplete="off" inputmode="search"></div>
+  <button class="btn" type="submit">${ic('search')}Find accounts</button></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap" class="muted"><span style="font-size:13px">One box covers both. Nothing is pulled until you enter at least ${q.minChars} characters.</span>${envPill(q)}</div>
+  <div class="err" id="terr"></div></form>
+ <div id="tres"></div>`;
+
+ const res=()=>S.cache.txns;
+ const acct=()=>res()&&res().rows.find(r=>r.USER_ID===S.sel.txnAcct);
+ const filtered=()=>{
+  const r=res();if(!r)return [];
+  const from=f.from?Date.parse(f.from+'T00:00:00Z'):null,to=f.to?Date.parse(f.to+'T00:00:00Z')+86400000:null,tx=f.text.toLowerCase();
+  return r.rows.filter(x=>(!f.status.length||f.status.includes(x.STATUS))&&(f.type==='All'||x.Account_type===f.type)
+   &&(from==null||x.CREATED_DATE>=from)&&(to==null||x.CREATED_DATE<to)
+   &&(!tx||[x.USER_ID,x.USER_NAME,x.FIRST_NAME,x.Name,x.PARTNER_ID,x.CREATED_BY].join(' ').toLowerCase().includes(tx)));
+ };
+
+ const drawTable=()=>{
+  const rows=filtered(),box=$('#ttab');if(!box)return;
+  $('#tcount').textContent=`${rows.length} of ${res().rows.length} shown`;
+  box.innerHTML=rows.length?`<div class="tablewrap"><table style="min-width:1000px"><thead><tr><th style="width:64px">Select</th><th>User ID</th><th>Name</th><th>Username</th><th>Mobile</th><th>Email</th><th>Account type</th><th>Status</th><th>Created</th><th>Created by</th><th>Last modified</th></tr></thead><tbody>
+   ${rows.map(r=>`<tr class="click" data-row="${esc(r.USER_ID)}"><td><input type="radio" name="tacct" data-pk="${esc(r.USER_ID)}" ${S.sel.txnAcct===r.USER_ID?'checked':''} aria-label="Select ${esc(r.USER_NAME)}"></td><td class="mono">${esc(r.USER_ID)}<div class="muted">Partner ${esc(r.PARTNER_ID)}</div></td><td><b>${esc(r.FIRST_NAME)} ${esc(r.Name)}</b></td><td class="mono">${esc(r.USER_NAME)}</td><td class="mono">${esc(r.MOBILE_NUMBER||'—')}</td><td>${esc(r.EMAIL_ID||'—')}</td><td>${esc(r.Account_type)}</td><td>${pill(r.STATUS)}</td><td class="num">${fmtDate(r.CREATED_DATE)}</td><td class="mono">${esc(r.CREATED_BY||'—')}</td><td class="num">${fmtDate(r.LAST_MODIFIED_DATE)}</td></tr>`).join('')}</tbody></table></div>`
+   :'<div class="card empty">No accounts match these filters.</div>';
+  $$('[data-row]',box).forEach(tr=>tr.onclick=()=>{const id=tr.dataset.row;if(S.sel.txnAcct===id)return;S.sel.txnAcct=id;S.cache.hist=null;const hr=$('#hres');if(hr)hr.innerHTML='';drawTable();upd2()});
+ };
+ const upd2=()=>{
+  const a=acct(),el=$('#hsel');
+  if(el)el.innerHTML=a?`<b>${esc(a.FIRST_NAME)} ${esc(a.Name)}</b> · username <span class="mono">${esc(a.USER_NAME)}</span> · Partner ID <span class="mono">${esc(a.PARTNER_ID)}</span>`:'<span class="muted">No account selected. Tick one in the table above.</span>';
+  const b=$('#h2go');if(b)b.disabled=!a;
+ };
+
+ const drawHist=()=>{
+  const box=$('#hres'),c=S.cache.hist;if(!box)return;if(!c){box.innerHTML='';return}
+  const ok=c.ok,bad=c.bad,lim=Number(c.rowLimit)||0;
+  const canDl=can('export:txns');
+  if(!c.total){box.innerHTML=`<div class="card empty"><b>No transactions found</b><div>${esc(c.label)} for Partner ID ${esc(c.pid)} returned nothing. Try a longer period.</div></div>`;return}
+  const pv=c.preview;
+  box.innerHTML=`<div class="card panel" style="background:var(--surface2)">
+   <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>${fmtN(c.total)} transactions</h3><div class="muted" style="font-size:13px">${esc(c.label)} · Partner ID <span class="mono">${esc(c.pid)}</span> · ${c.env.toUpperCase()} · pulled ${esc(c.at)}</div></div>
+    <button class="btn" id="xl" ${canDl?'':'disabled title="Ask an admin for export access"'}>${ic(canDl?'download':'lock')}Download Excel</button></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill good"><span class="dot"></span>${fmtN(ok)} success</span><span class="pill ${bad?'bad':'neutral'}"><span class="dot"></span>${fmtN(bad)} failure</span>${lim&&c.total>=lim?`<span class="pill warn"><span class="dot"></span>Row limit of ${fmtN(lim)} reached. Pick a shorter period.</span>`:''}</div>
+   <div class="tablewrap" style="background:var(--surface)"><table style="min-width:900px"><thead><tr><th>Date and time</th><th>Transaction ID</th><th>Service</th><th>Status</th><th>Side</th><th class="r">Amount</th><th class="r">Net</th><th class="r">Balance before</th><th class="r">Balance after</th><th>Other party</th></tr></thead><tbody>
+   ${pv.map(r=>`<tr><td class="num">${esc(fmtIso(r.TRANSACTION_DATE))}</td><td class="mono">${esc(r.TRANSACTION_ID)}</td><td>${esc(r.SERVICE_NAME)}</td><td>${pill(r.STATUS_TYPE)}</td><td>${esc(r.WALLET_SIDE)}</td><td class="r num">${fmtN(r.TRANSACTION_AMOUNT)}</td><td class="r num">${fmtN(r.WALLET_NET_AMOUNT)}</td><td class="r num">${fmtN(r.WALLET_BAL_BEFORE)}</td><td class="r num">${fmtN(r.WALLET_BAL_AFTER)}</td><td>${esc(r.OTHER_USER_FULL_NAME||'—')}</td></tr>`).join('')}</tbody></table></div>
+   <div class="muted" style="font-size:13px">Showing the first ${pv.length}. The Excel file has all ${fmtN(c.total)} rows and all ${HIST_COLS.length} columns. Amounts are shown as returned by Superset.</div></div>`;
+  const xb=$('#xl');
+  if(xb)xb.onclick=async()=>{
+   const a=res().rows.find(r=>r.USER_ID===c.acct)||{};
+   const safe=s=>String(s).replace(/[^\w-]+/g,'');
+   const fname=`transactions_${safe(a.USER_NAME||c.pid)}_${safe(c.per)}_${new Date().toISOString().slice(0,10)}.xlsx`;
+   if(LIVE){
+    xb.disabled=true;toast('Preparing Excel file…');
+    try{await downloadServer('/api/txns/history/'+encodeURIComponent(c.pullId)+'/xlsx',fname);toast('Saved '+fname)}catch(e){toast(e.message||'Could not download the file.')}
+    xb.disabled=!can('export:txns');return;
+   }
+   if(typeof XLSX==='undefined'){toast('The Excel library did not load. Reload the page and try again.');return}
+   xb.disabled=true;toast('Preparing Excel file…');
+   await new Promise(r=>setTimeout(r,30));
+   try{
+    const info=[['Account',(a.FIRST_NAME||'')+' '+(a.Name||'')],['Username',a.USER_NAME||''],['Mobile number',a.MOBILE_NUMBER||''],['Partner ID',c.pid],['Period',c.label],['Date filter sent',c.range],['Environment',c.env.toUpperCase()],['Rows',c.total],['Pulled at',c.at],['Pulled by',S.user.name]];
+    const buf=buildXlsx(XLSX,HIST_COLS,c.all,info);
+    await saveFile(fname,buf,'txns',`Downloaded ${c.total} transactions for ${a.USER_NAME||c.pid} (Partner ${c.pid}), ${c.label}`);
+   }catch(e){toast('Could not build the Excel file.')}
+   xb.disabled=!can('export:txns');
+  };
+ };
+
+ const pull=async()=>{
+  const a=acct();if(!a)return;
+  const hr=$('#hres'),go=$('#h2go'),sec=Math.max(5,Number(h.timeoutSec)||60);
+  if(!LIVE&&!supUrl(h)){hr.innerHTML=`<div class="diag"><b>No ${h.env.toUpperCase()} URL</b><span>The transaction history connection has no URL yet.${can('admin')?' Add it under Data Sources.':' Ask an admin to add it.'}</span></div>`;return}
+  const per=$('#h2p').value,pr=periodRange(per),label=PERIODS.find(p=>p[0]===per)[1];
+  S.sel.txnPer=per;S.cache.hist=null;
+  log('search','txns',`Transaction history: ${a.USER_NAME} (Partner ID ${a.PARTNER_ID}), ${label}`);
+  const ctl=new AbortController(),t0=Date.now();let why='';
+  go.disabled=true;
+  hr.innerHTML=`<div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><b>Pulling transactions…</b><span class="mono" id="hel">0s of ${sec}s</span></div><div class="bar"><i id="hbar" style="width:0"></i></div>
+   <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Long periods can take a while. This stops after ${sec} seconds.</span><button class="btn ghost sm" id="hcx" type="button">Cancel</button></div></div>`;
+  const tick=setInterval(()=>{const s=Math.min(sec,Math.floor((Date.now()-t0)/1000)),e=$('#hel'),b=$('#hbar');if(e)e.textContent=s+'s of '+sec+'s';if(b)b.style.width=(s/sec*100)+'%'},250);
+  const to=setTimeout(()=>{why='timeout';ctl.abort()},(sec+(LIVE?10:0))*1000);
+  $('#hcx').onclick=()=>{why='cancel';ctl.abort()};
+  try{
+   let c;
+   if(LIVE){const d=await api('POST','/api/txns/history',{partnerId:a.PARTNER_ID,period:per},{signal:ctl.signal});c={acct:a.USER_ID,pid:a.PARTNER_ID,per,label,...d}}
+   else{
+    const body=buildBody(h,[a.PARTNER_ID],pr.range);
+    const rows=await fetchHistory(body,demoHistory(a,pr),ctl.signal);
+    c={acct:a.USER_ID,pid:a.PARTNER_ID,per,label,...histSummary(rows),all:rows,at:now(),range:pr.range,env:h.env,rowLimit:Number(supActive(h).rowLimit)||0};
+   }
+   S.cache.hist=c;
+   if($('#hres'))drawHist();
+  }catch(e){
+   if(e&&e.code==='timeout')why='timeout';
+   const box=$('#hres');
+   if(box)box.innerHTML=why==='timeout'
+    ?`<div class="diag"><b>The request timed out after ${sec} seconds</b><span>Superset did not answer in time. Try a shorter period.${can('admin')?' You can raise the timeout under Data Sources.':' An admin can raise the timeout.'}</span></div>`
+    :why==='cancel'?'<div class="card empty">Cancelled.</div>':`<div class="diag"><b>Could not pull transactions</b><span>${esc(e.message||'Unknown error')}</span></div>`;
+   if(why==='timeout')log('error','txns',`Transaction history timed out after ${sec}s: ${a.USER_NAME}, ${label}`);
+  }finally{clearInterval(tick);clearTimeout(to);const g=$('#h2go');if(g)g.disabled=!acct()}
+ };
+
+ const drawRes=()=>{
+  const box=$('#tres');if(!box)return;const r=res();
+  if(!r){box.innerHTML='<div class="card empty">Enter a username or mobile number above to pull accounts.</div>';return}
+  const searched=r.vals.map(x=>'"'+esc(x)+'"').join(' and ');
+  if(!r.rows.length){box.innerHTML=`<div class="card empty"><b>No accounts found for "${esc(r.val)}"</b><div>Searched ${searched} on ${esc(q.searchCols.join(' and '))}. Check the number and try again.</div></div>`;return}
+  const statuses=[...new Set(r.rows.map(x=>x.STATUS))],types=[...new Set(r.rows.map(x=>x.Account_type))];
+  const cnt=s=>r.rows.filter(x=>x.STATUS===s).length;
+  box.innerHTML=`<div style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr)">
+  ${LIVE?'':'<div class="src"><span><b>Preview data.</b> This page is not connected to Superset here, so these accounts and transactions are made up to show the layout.</span></div>'}
+  ${r.truncated?`<div class="diag"><b>Row limit reached</b><span>Superset returned its maximum of ${fmtN(r.limit)} rows, so some accounts may be missing. Use a longer number.</span></div>`:''}
+  <div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>${r.rows.length} account${r.rows.length===1?'':'s'} found</h3><div class="muted" style="font-size:13px">Searched ${searched} · ${r.env.toUpperCase()} · pulled ${esc(r.at)} · <span id="tcount"></span></div></div>${exportBtn('txns')}</div>
+   <div class="toolbar">
+    <div class="field" style="flex:2 1 260px"><label>Status</label><div class="picker" style="gap:6px">${statuses.map(s=>`<label><input type="checkbox" data-st="${esc(s)}" ${f.status.includes(s)?'checked':''}><span class="chip" style="display:inline-block;cursor:pointer">${esc(s)} · ${cnt(s)}</span></label>`).join('')}</div></div>
+    <div class="field"><label for="ft">Account type</label><select class="inp" id="ft"><option>All</option>${types.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>
+    <div class="field"><label for="ff1">Created from</label><input class="inp" id="ff1" type="date" value="${esc(f.from)}"></div>
+    <div class="field"><label for="ff2">Created to</label><input class="inp" id="ff2" type="date" value="${esc(f.to)}"></div>
+    <div class="field"><label for="fx">Find in results</label><input class="inp" id="fx" value="${esc(f.text)}" placeholder="Name, ID, partner…"></div>
+    <button class="btn ghost" type="button" id="fclr">Clear filters</button></div></div>
+  <div id="ttab"></div>
+  <div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3>Transaction history</h3><span style="display:flex;gap:6px">${envPill(h)}</span></div>
+   <div id="hsel"></div>
+   <div class="toolbar"><div class="field" style="flex:0 1 240px"><label for="h2p">Period</label><select class="inp" id="h2p">${PERIODS.map(p=>`<option value="${p[0]}" ${(S.sel.txnPer||'30')===p[0]?'selected':''}>${p[1]}</option>`).join('')}</select></div>
+    <button class="btn" id="h2go" type="button">${ic('cloud_download')}Pull transactions</button></div>
+   <div id="hres"></div></div></div>`;
+  $$('[data-st]',box).forEach(c=>c.onchange=()=>{f.status=c.checked?[...f.status,c.dataset.st]:f.status.filter(x=>x!==c.dataset.st);drawTable()});
+  $('#ft').onchange=e=>{f.type=e.target.value;drawTable()};
+  $('#ff1').onchange=e=>{f.from=e.target.value;drawTable()};$('#ff2').onchange=e=>{f.to=e.target.value;drawTable()};
+  $('#fx').oninput=e=>{f.text=e.target.value;drawTable()};
+  $('#fclr').onclick=()=>{S.filters.txns={status:[],type:'All',from:'',to:'',text:''};Object.assign(f,S.filters.txns);drawRes()};
+  $('#h2go').onclick=pull;
+  $('#h2p').onchange=()=>{S.cache.hist=null;S.sel.txnPer=$('#h2p').value;const hr=$('#hres');if(hr)hr.innerHTML=''};
+  wireExport(box,'txns',()=>{const rows=filtered();
+   return {filename:`accounts_${r.val.replace(/[^\w-]/g,'')}_${new Date().toISOString().slice(0,10)}.csv`,
+    data:toCsv(LOOKUP_COLS,rows.map(x=>({...x,CREATED_DATE:fmtIso(x.CREATED_DATE),LAST_MODIFIED_DATE:fmtIso(x.LAST_MODIFIED_DATE)}))),detail:`Downloaded ${rows.length} account row(s) for "${r.val}"`}});
+  drawTable();upd2();drawHist();
+ };
+
+ const run=async(pre)=>{
+  const val=$('#tq').value.trim();S.sel.txnQ=val;
+  if(val.length<q.minChars){$('#terr').textContent=`Enter at least ${q.minChars} characters of the username or mobile number.`;return}
+  if(!LIVE&&!supUrl(q)){$('#terr').textContent=`The ${q.env.toUpperCase()} connection has no URL yet.`+(can('admin')?' Add it under Data Sources.':' Ask an admin to add it.');return}
+  $('#terr').textContent='';
+  const vals=variants(val);
+  log('search','txns','Account lookup: "'+val+'"');
+  $('#tres').innerHTML='<div class="card empty">Looking up accounts…</div>';
+  let d;
+  try{
+   if(LIVE)d=await api('POST','/api/txns/lookup',{value:val});
+   else{await new Promise(r=>setTimeout(r,450));d={rows:lookupDemo(q,vals),vals,env:q.env,at:now()}}
+  }catch(x){if($('#tres'))$('#tres').innerHTML=`<div class="diag"><b>Lookup failed</b><span>${esc(x.message||'Unknown error')}</span></div>`;return}
+  if(S.route!=='txns'||!$('#tres'))return;
+  const rows=d.rows;
+  S.cache.txns={val,vals:d.vals||vals,rows,at:d.at||now(),env:d.env||q.env,truncated:!!d.truncated,limit:d.limit};S.cache.hist=null;
+  S.sel.txnAcct=(pre&&rows.some(r=>r.USER_ID===pre))?pre:(rows.length===1?rows[0].USER_ID:null);
+  S.filters.txns={status:[],type:'All',from:'',to:'',text:''};Object.assign(f,S.filters.txns);
+  drawRes();
+ };
+ $('#tf').onsubmit=e=>{e.preventDefault();run()};
+ if(S.sel.txnAuto){const id=S.sel.txnAuto;S.sel.txnAuto=null;run(id)}else drawRes();
+};
+
+/* ===== Data Sources: Superset connection editor ===== */
+let SUPAUTH={};
+const authPill=c=>{if(!LIVE)return '';const a=(SUPAUTH[c.env]||{});return a.saved?`<span class="pill good"><span class="dot"></span>${c.env.toUpperCase()} login saved</span>`:`<span class="pill warn"><span class="dot"></span>No ${c.env.toUpperCase()} login. Paste a curl</span>`};
+function supCards(){
+ return Object.entries(SUP).map(([k,c])=>`<div class="card srccard"><div style="display:flex;gap:12px;align-items:center"><span class="pi">${ic('receipt_long')}</span><div style="min-width:0"><b>${esc(c.label)}</b><div class="muted" style="font-size:13px">${esc(c.desc)}</div></div></div>
+  <div class="mono muted" style="overflow-wrap:anywhere;font-size:12px">${supUrl(c)?esc(supUrl(c)):'No URL yet'}</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill ${c.env==='prod'?'accent':'info'}">${c.env.toUpperCase()}</span><span class="pill neutral">${Number(c.timeoutSec)||60}s timeout</span>${supUrl(c)?'<span class="pill good"><span class="dot"></span>Ready</span>':'<span class="pill warn"><span class="dot"></span>No URL</span>'}${authPill(c)}</span><span style="display:flex;gap:6px;flex-wrap:wrap">${LIVE?`<button class="btn ghost sm" data-test="${k}">${ic('bolt')}Test</button>`:''}<button class="btn ghost sm" data-sup="${k}">${ic('edit')}Edit connection</button></span></div><div class="muted" style="font-size:13px" data-tres="${k}"></div></div>`).join('');
+}
+function supEditor(key,box,onSaved){
+ const orig=SUP[key],d=JSON.parse(JSON.stringify(orig));let tab=d.env,msg='';
+ const F=[['base','Base URL','http://superset.example.com:8091',2],['datasource','Dataset ID','74',1],['slice','Chart ID','76',1],['dashboard','Dashboard ID','99',1],['rowLimit','Row limit','1000',1]];
+ const val=id=>{const el=$('#'+id,box);return el?el.value.trim():null};
+ const collect=()=>{
+  const e=d.envs[tab];F.forEach(([k])=>{const x=val('sf_'+k);if(x!==null)e[k]=x});
+  if(val('sf_endpoint')!==null){d.endpoint=val('sf_endpoint');d.searchCols=val('sf_sc').split(',').map(x=>x.trim()).filter(Boolean);d.dateCol=val('sf_dc');d.minChars=Math.max(1,Number(val('sf_mc'))||1);d.timeoutSec=Math.max(5,Math.min(600,Number(val('sf_to'))||60));d.columns=val('sf_cols').split(/[,\n]/).map(x=>x.trim()).filter(Boolean);
+   const ok=[],bad=[];val('sf_fx').split('\n').map(x=>x.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^(\S+)\s+(IS NOT NULL|IS NULL)$/i);m?ok.push({col:m[1],op:m[2].toUpperCase()}):bad.push(l)});d.fixedFilters=ok;d._bad=bad}
+ };
+ const draw=()=>{
+  const e=d.envs[tab];
+  let prev='';try{prev=JSON.stringify(buildBody({...d,env:tab},['{value}'],'No filter'),null,2)}catch(x){prev='Could not build a preview.'}
+  box.innerHTML=`<div class="card panel" style="margin-top:6px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3>Edit: ${esc(d.label)}</h3><button class="btn ghost sm" id="se_x">Close</button></div>
+  <div class="field"><label>The hub uses</label><div class="tabs">${['uat','prod'].map(t=>`<button type="button" data-use="${t}" class="${d.env===t?'on':''}">${t.toUpperCase()}${d.env===t?' (live)':''}</button>`).join('')}</div></div>
+  <div class="field"><label>Edit settings for</label><div class="tabs">${['uat','prod'].map(t=>`<button type="button" data-et="${t}" class="${tab===t?'on':''}">${t.toUpperCase()}</button>`).join('')}</div></div>
+  <div class="toolbar">${F.map(([k,l,p,w])=>`<div class="field" style="flex:${w} 1 ${w>1?'300px':'130px'}"><label for="sf_${k}">${l}</label><input class="inp ${k==='base'?'mono':''}" id="sf_${k}" value="${esc(e[k])}" placeholder="${p}"></div>`).join('')}</div>
+  ${tab==='prod'?'<div><button class="btn ghost sm" type="button" id="se_copy">Copy IDs and limit from UAT</button> <span class="muted" style="font-size:13px">Leaves the Prod URL as it is.</span></div>':''}
+  <div class="pgh" style="padding-top:6px"><h3>Same for UAT and Prod</h3></div>
+  <div class="toolbar"><div class="field" style="flex:2 1 260px"><label for="sf_endpoint">API path</label><input class="inp mono" id="sf_endpoint" value="${esc(d.endpoint)}"></div>
+   <div class="field" style="flex:1 1 200px"><label for="sf_sc">Search columns</label><input class="inp mono" id="sf_sc" value="${esc(d.searchCols.join(', '))}"></div>
+   <div class="field" style="flex:1 1 160px"><label for="sf_dc">Date column</label><input class="inp mono" id="sf_dc" value="${esc(d.dateCol)}"></div>
+   <div class="field" style="flex:0 1 110px"><label for="sf_mc">Min characters</label><input class="inp" id="sf_mc" type="number" min="1" value="${d.minChars}"></div>
+   <div class="field" style="flex:0 1 130px"><label for="sf_to">Timeout (seconds)</label><input class="inp" id="sf_to" type="number" min="5" max="600" value="${Number(d.timeoutSec)||60}"></div></div>
+  <div class="field"><label for="sf_fx">Always-applied filters (one per line, for example Account_type IS NOT NULL)</label><textarea class="inp mono" id="sf_fx" rows="2" placeholder="Account_type IS NOT NULL">${esc((d.fixedFilters||[]).map(f=>f.col+' '+f.op).join('\n'))}</textarea></div>
+  <div class="field"><label for="sf_cols">Columns returned (comma separated)</label><textarea class="inp mono" id="sf_cols" rows="3">${esc(d.columns.join(', '))}</textarea></div>
+  <div class="field"><label for="sf_curl">Or paste a curl to fill these in</label><textarea class="inp mono" id="sf_curl" rows="3" placeholder="curl --location 'http://…/api/v1/chart/data' --data '{…}'"></textarea>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="se_fill">${ic('auto_fix_high')}Fill from curl</button><span class="muted" style="font-size:13px">Fills the ${tab.toUpperCase()} settings.${LIVE?' The login in the curl (cookie, token) is also saved on the server, encrypted.':' Any cookie or token in the curl is ignored.'}</span></div></div>
+  <details><summary style="cursor:pointer;font-weight:600">Preview the request that will be sent</summary><div class="code" style="margin-top:8px">POST ${esc(e.base?e.base.replace(/\/+$/,'')+d.endpoint:'(no base URL yet)')}
+Content-Type: application/json
+Authorization: added on the server
+Timeout: ${Number(d.timeoutSec)||60} seconds
+
+${esc(prev)}</div></details>
+  <div class="err" id="se_err">${esc(msg)}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="se_save">${ic('save')}Save connection</button><button class="btn ghost" type="button" id="se_cancel">Cancel</button></div>
+  <div class="muted" style="font-size:13px">${LIVE?'Pasting a curl also saves its login (cookie, token) on the server, encrypted. It is never shown again. When Superset says the login expired, paste a fresh curl here.':'Cookies and tokens are never kept in this page. In the full project the server stores them encrypted.'}</div></div>`;
+  $('#se_x',box).onclick=$('#se_cancel',box).onclick=()=>box.innerHTML='';
+  $$('[data-et]',box).forEach(b=>b.onclick=()=>{collect();tab=b.dataset.et;msg='';draw()});
+  $$('[data-use]',box).forEach(b=>b.onclick=()=>{collect();d.env=b.dataset.use;msg='';draw()});
+  const cp=$('#se_copy',box);if(cp)cp.onclick=()=>{collect();const u=d.envs.uat;Object.assign(d.envs.prod,{datasource:u.datasource,slice:u.slice,dashboard:u.dashboard,rowLimit:u.rowLimit});draw()};
+  $('#se_fill',box).onclick=async()=>{collect();const raw=$('#sf_curl',box).value;const r=parseCurl(raw);
+   if(r.error){msg=r.error;draw();return}
+   let saved='';if(LIVE){try{const ra=await api('PUT','/api/admin/superset-auth/'+tab,{curl:raw});saved=' The login in it was saved (encrypted) for '+tab.toUpperCase()+'.';SUPAUTH=(ra&&ra.auth)||SUPAUTH}catch(e){saved=' The login was not saved: '+e.message}}
+   Object.assign(d.envs[tab],{base:r.base,datasource:r.datasource??'',slice:r.slice??'',dashboard:r.dashboard??'',rowLimit:r.rowLimit||1000});
+   d.endpoint=r.endpoint||d.endpoint;if(r.columns.length)d.columns=r.columns;if(r.searchCols.length)d.searchCols=r.searchCols;d.dateCol=r.dateCol;d.orderBy=r.orderBy;d.fixedFilters=r.fixedFilters;msg='';draw();toast(LIVE?('Filled from curl.'+saved):'Filled from curl. The cookie was ignored.')};
+  $('#se_save',box).onclick=async()=>{collect();
+   for(const t of ['uat','prod']){const b=d.envs[t].base;if(b&&!/^https?:\/\/[^\s/]+/i.test(b)){tab=t;msg=t.toUpperCase()+' base URL must start with http:// or https://';draw();return}}
+   if(!d.envs[d.env].base){msg='Add the '+d.env.toUpperCase()+' base URL before making it the live one.';draw();return}
+   if(!d.searchCols.length){msg='Add at least one search column.';draw();return}
+   if(d._bad&&d._bad.length){msg='Always-applied filters can only be "COLUMN IS NOT NULL" or "COLUMN IS NULL". Fix: '+d._bad.join(', ');draw();return}
+   delete d._bad;
+   if(LIVE){try{const saved=await api('PUT','/api/admin/connections/'+encodeURIComponent(key),d);Object.assign(orig,saved||d)}catch(e){msg=e.message||'Could not save.';draw();return}}
+   const was=orig.env,wasT=orig.timeoutSec;if(!LIVE)Object.assign(orig,d);
+   log('setting','admin',`Updated Superset connection "${orig.label}" (hub uses ${orig.env.toUpperCase()}${was!==orig.env?', was '+was.toUpperCase():''}, timeout ${orig.timeoutSec}s${wasT!==orig.timeoutSec?', was '+wasT+'s':''})`);
+   toast('Connection saved. The hub now uses '+orig.env.toUpperCase()+'.');box.innerHTML='';onSaved();};
+ };
+ draw();
+}
+</script>
+<script>
+/* ----- Users & Permissions ----- */
+function dropUser(uid){S.open.filter(o=>o.user.id===uid).forEach(closeEntry);SESSIONS=SESSIONS.filter(s=>s.uid!==uid)}
+const pcols=()=>[...MODULES.map(m=>[m.id,({search:'Search',fees:'Fees',txns:'History',limits:'Limits',giftcards:'Giftcards',gpl:'GPL'}[m.id]||m.name)]),...SPECIAL.map(s=>[s.id,{dl_images:'Images',unmask:'Unmask',export:'Export'}[s.id]]),['admin','Admin']];
+VIEWS.users=v=>{
+ const sel=USERS.find(u=>u.id===S.sel.permUser)||USERS[0];S.sel.permUser=sel.id;
+ const q=(S.filters.pq||'').toLowerCase();
+ const list=USERS.filter(u=>!q||(u.name+u.email).toLowerCase().includes(q));
+ const has=k=>sel.perms.includes(k);
+ const seg=(key,dis)=>{const on=has(key);return `<div class="seg" role="group" aria-label="${esc(key)}"><button class="yes ${on?'on':''}" data-set="${esc(key)}" data-val="1" aria-pressed="${on}" ${dis?'disabled':''}>${ic('check')}Allowed</button><button class="no ${on?'':'on'}" data-set="${esc(key)}" data-val="0" aria-pressed="${!on}" ${dis?'disabled':''}>${ic('block')}Blocked</button></div>`};
+ const label=k=>k==='admin'?'Admin access':k.startsWith('export:')?'Export · '+(MODULES.find(m=>m.id===k.slice(7))||{name:k}).name:([...MODULES,...SPECIAL].find(x=>x.id===k)||{name:k}).name;
+ const nMods=u=>u.perms.filter(p=>MODULES.some(m=>m.id===p)).length;
+ const sess=SESSIONS.filter(x=>x.uid===sel.id).length;
+ v.innerHTML=`<div class="page-h"><div><h2>Users & Permissions</h2><p>Pick a person, then set what they can open and what they can export or download. Changes apply on their next page load and are written to the audit log.</p></div>
+  <button class="btn" id="addU">${ic('person_add')}Add user</button></div>
+ ${S.sel.tempPw?`<div class="diag" style="background:var(--warn-soft)"><b style="color:var(--warn)">Temporary password for ${esc(S.sel.tempPw.name)}</b><span>Copy it now. It is shown once. They must change it when they sign in.</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><span class="mono" style="font-size:15px;font-weight:600">${esc(S.sel.tempPw.pw)}</span><button class="btn ghost sm" id="cpw">Copy</button><button class="btn ghost sm" id="dpw">Done</button></div></div>`:''}
+ <div id="addForm"></div>
+ <div class="permgrid">
+  <aside class="card plist">
+   <input class="inp" id="pq" placeholder="Search people" value="${esc(S.filters.pq||'')}" aria-label="Search people">
+   ${list.map(u=>`<button class="pitem ${u.id===sel.id?'on':''}" data-pick="${u.id}"><span class="avatar">${esc(initials(u.name))}</span><span class="meta"><b>${esc(u.name)}</b><span class="muted" style="font-size:12.5px">${esc(u.role)} · ${nMods(u)}/${MODULES.length} modules</span></span>${u.status==='active'?'':'<span class="pill bad">Off</span>'}</button>`).join('')||'<div class="muted" style="padding:12px">No one matches.</div>'}
+  </aside>
+  <section class="card panel" style="padding:22px">
+   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <span class="avatar" style="width:52px;height:52px;font-size:17px">${esc(initials(sel.name))}</span>
+    <div style="flex:1 1 200px;min-width:0"><h3 style="font-size:22px">${esc(sel.name)}</h3><div class="muted">${esc(sel.email)} · ${sel.status==='active'?'Active':'Disabled'} · ${sess} open session${sess===1?'':'s'}</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-tog="${sel.id}">${ic(sel.status==='active'?'person_off':'person')}${sel.status==='active'?'Disable':'Enable'}</button>${LIVE?`<button class="btn ghost sm" data-rpw="${sel.id}">${ic('lock_reset')}Reset password</button>`:''}<button class="btn ghost sm" data-rm="${sel.id}">${ic('delete')}Remove</button></div>
+   </div>
+   <div class="toolbar" style="margin-top:6px"><div class="field" style="max-width:220px"><label for="rr">Start from a role</label><select class="inp" id="rr">${Object.keys(DEFAULT_PERMS).map(r=>`<option ${r===sel.role?'selected':''}>${r}</option>`).join('')}</select></div><button class="btn ghost" id="rb">Apply role</button></div>
+
+   <div class="pgh"><h3>Modules</h3><div style="display:flex;gap:6px"><button class="btn ghost sm" data-grp="mods" data-val="1">Allow all</button><button class="btn ghost sm" data-grp="mods" data-val="0">Block all</button></div></div>
+   ${MODULES.map(m=>`<div class="prow"><span class="pi">${ic(m.ico)}</span><div class="pt"><b>${esc(m.name)}</b><span class="muted" style="font-size:13px">${esc(m.desc)}</span></div>
+    <div class="pctl"><div class="pc"><small>Open</small>${seg(m.id)}</div><div class="pc"><small>Export CSV</small>${seg(EXP(m.id),!has(m.id))}</div></div></div>`).join('')}
+
+   <div class="pgh"><h3>Downloads and sensitive data</h3><div style="display:flex;gap:6px"><button class="btn ghost sm" data-grp="act" data-val="1">Allow all</button><button class="btn ghost sm" data-grp="act" data-val="0">Block all</button></div></div>
+   ${SPECIAL.map(x=>`<div class="prow"><span class="pi">${ic(x.ico)}</span><div class="pt"><b>${esc(x.name)}</b><span class="muted" style="font-size:13px">${esc(x.desc)}</span></div><div class="pctl"><div class="pc"><small>Permission</small>${seg(x.id)}</div></div></div>`).join('')}
+
+   <div class="pgh"><h3>Administration</h3></div>
+   <div class="prow"><span class="pi">${ic('admin_panel_settings')}</span><div class="pt"><b>Admin access</b><span class="muted" style="font-size:13px">Manage users, hub options, sessions, audit log and data sources.</span></div><div class="pctl"><div class="pc"><small>Permission</small>${seg('admin')}</div></div></div>
+  </section></div>`;
+
+ const sync=async u=>{if(!LIVE)return;try{await api('PUT','/api/admin/users/'+encodeURIComponent(u.id),{role:u.role,perms:u.perms,status:u.status})}catch(e){toast(e.message||'Could not save the change.')}};
+ const setPerm=(u,k,on)=>{
+  if(u.id===S.user.id&&k==='admin'&&!on)return toast('You cannot remove your own admin access.');
+  const had=u.perms.includes(k);if(had===on)return;
+  u.perms=on?[...u.perms,k]:u.perms.filter(x=>x!==k);
+  if(!on&&MODULES.some(m=>m.id===k))u.perms=u.perms.filter(x=>x!==EXP(k));
+  log(on?'grant':'revoke','admin',`${on?'Granted':'Revoked'} "${label(k)}" ${on?'to':'from'} ${u.name}`);
+ };
+ $$('[data-set]',v).forEach(b=>b.onclick=async()=>{setPerm(sel,b.dataset.set,b.dataset.val==='1');toast(`${b.dataset.val==='1'?'Allowed':'Blocked'}: ${label(b.dataset.set)} for ${sel.name.split(' ')[0]}`);await sync(sel);renderView()});
+ $$('[data-grp]',v).forEach(b=>b.onclick=async()=>{const on=b.dataset.val==='1';
+  const keys=b.dataset.grp==='mods'?[...MODULES.map(m=>m.id),...MODULES.map(m=>EXP(m.id))]:SPECIAL.map(x=>x.id);
+  keys.forEach(k=>setPerm(sel,k,on));await sync(sel);renderView()});
+ $$('[data-pick]',v).forEach(b=>b.onclick=()=>{S.sel.permUser=b.dataset.pick;drawView()});
+ $('#pq').oninput=e=>{S.filters.pq=e.target.value;drawView();const el=$('#pq');el.focus();el.setSelectionRange(el.value.length,el.value.length)};
+ $$('[data-tog]',v).forEach(b=>b.onclick=async()=>{const u=USERS.find(x=>x.id===b.dataset.tog);
+  if(u.id===S.user.id)return toast('You cannot disable your own account.');
+  u.status=u.status==='active'?'disabled':'active';
+  if(u.status==='disabled')dropUser(u.id);
+  log('account','admin',`${u.status==='active'?'Enabled':'Disabled'} ${u.name}`);await sync(u);renderView()});
+ $$('[data-rm]',v).forEach(b=>b.onclick=async()=>{const u=USERS.find(x=>x.id===b.dataset.rm);
+  if(u.id===S.user.id)return toast('You cannot remove yourself.');
+  if(LIVE){try{await api('DELETE','/api/admin/users/'+encodeURIComponent(u.id))}catch(e){return toast(e.message||'Could not remove the user.')}}
+  USERS=USERS.filter(x=>x.id!==u.id);dropUser(u.id);S.sel.permUser=null;log('account','admin','Removed '+u.name);renderView()});
+ const cpw=$('#cpw');if(cpw){cpw.onclick=()=>{try{navigator.clipboard.writeText(S.sel.tempPw.pw).then(()=>toast('Copied'),()=>toast('Select and copy the password.'))}catch(e){toast('Select and copy the password.')}};$('#dpw').onclick=()=>{S.sel.tempPw=null;drawView()}}
+ $$('[data-rpw]',v).forEach(b=>b.onclick=async()=>{try{const d=await api('POST','/api/admin/users/'+encodeURIComponent(b.dataset.rpw)+'/reset-password');S.sel.tempPw={name:sel.name,pw:d.tempPassword};drawView()}catch(e){toast(e.message||'Could not reset the password.')}});
+ $('#rb').onclick=async()=>{const r=$('#rr').value;
+  if(sel.id===S.user.id&&r!=='Admin')return toast('You cannot lower your own role.');
+  if(LIVE){try{await api('PUT','/api/admin/users/'+encodeURIComponent(sel.id),{role:r,applyRoleDefaults:true})}catch(e){return toast(e.message||'Could not change the role.')}return renderView()}
+  sel.role=r;sel.perms=[...DEFAULT_PERMS[r]];log('role','admin',`Set ${sel.name} to ${r}`);renderView()};
+ $('#addU').onclick=()=>{
+  $('#addForm').innerHTML=`<form class="card panel" id="nu"><h3>New user</h3><div class="toolbar">
+   <div class="field"><label for="nn">Full name</label><input class="inp" id="nn" required></div>
+   <div class="field"><label for="ne">Email</label><input class="inp" id="ne" type="email" required></div>
+   <div class="field"><label for="nr">Role</label><select class="inp" id="nr"><option>Agent</option><option>Supervisor</option><option>Admin</option></select></div>
+   <button class="btn" type="submit">Create</button><button class="btn ghost" type="button" id="nc">Cancel</button></div>
+   <div class="muted" style="font-size:13px">${LIVE?'You will get a temporary password to give them. They must choose their own when they first sign in.':'They get a one-time link to set their own password. You can then fine-tune what they can do.'}</div></form>`;
+  $('#nc').onclick=()=>$('#addForm').innerHTML='';
+  $('#nu').onsubmit=async e=>{e.preventDefault();const r=$('#nr').value,id='u'+Date.now();
+   if(LIVE){try{const d=await api('POST','/api/admin/users',{name:$('#nn').value.trim(),email:$('#ne').value.trim(),role:r});S.sel.permUser=d.user.id;S.sel.tempPw={name:d.user.name,pw:d.tempPassword}}catch(x){return toast(x.message||'Could not create the user.')}return renderView()}
+   USERS.push({id,name:$('#nn').value.trim(),email:$('#ne').value.trim(),role:r,perms:[...DEFAULT_PERMS[r]],status:'active',mfa:false,last:'Never'});
+   S.sel.permUser=id;log('account','admin','Created user '+$('#nn').value.trim()+' as '+r);renderView()};
+ };
+};
+
+/* ----- Audit Log ----- */
+VIEWS.audit=v=>{
+ const f=S.filters.audit||(S.filters.audit={uid:'All',mod:'All',q:''});
+ const mods=['All',...new Set(AUDIT.map(a=>a.mod))];
+ v.innerHTML=`<div class="page-h"><div><h2>Audit Log</h2><p>Who signed in, what they opened and what they searched, with the exact values used. ${LIVE?'Stored in MongoDB.':'Stored in MongoDB once the cluster is connected.'}</p></div><button class="btn ghost sm" id="ax">Export CSV</button></div>
+ <div class="card panel"><div class="toolbar">
+  <div class="field"><label for="au">Person</label><select class="inp" id="au"><option value="All">All</option>${USERS.map(u=>`<option value="${u.id}" ${f.uid===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
+  <div class="field"><label for="am">Area</label><select class="inp" id="am">${mods.map(m=>`<option ${f.mod===m?'selected':''}>${m}</option>`).join('')}</select></div>
+  <div class="field"><label for="aq">Contains</label><input class="inp" id="aq" value="${esc(f.q)}" placeholder="e.g. TXN-88213"></div></div></div>
+ <div id="ares"></div>`;
+ const draw=()=>{
+  const rows=AUDIT.filter(a=>(f.uid==='All'||a.uid===f.uid)&&(f.mod==='All'||a.mod===f.mod)&&(!f.q||(a.detail+a.act).toLowerCase().includes(f.q.toLowerCase())));
+  const tone=a=>({login:'good',logout:'neutral',grant:'accent',revoke:'warn',download:'warn',export:'warn',account:'accent',role:'accent'}[a]||'neutral');
+  $('#ares').innerHTML=rows.length?`<div class="tablewrap"><table><thead><tr><th>Time</th><th>Person</th><th>Action</th><th>Area</th><th>Detail</th></tr></thead><tbody>
+  ${rows.map(a=>`<tr><td class="mono">${a.t}</td><td>${esc(a.un||uname(a.uid))}</td><td><span class="pill ${tone(a.act)}">${esc(a.act)}</span></td><td>${esc(a.mod)}</td><td>${esc(a.detail)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="card empty">No events match.</div>';
+ };
+ $('#au').onchange=e=>{f.uid=e.target.value;draw()};$('#am').onchange=e=>{f.mod=e.target.value;draw()};
+ $('#aq').oninput=e=>{f.q=e.target.value;draw()};
+ $('#ax').onclick=()=>{const rows=AUDIT.filter(a=>(f.uid==='All'||a.uid===f.uid)&&(f.mod==='All'||a.mod===f.mod)&&(!f.q||(a.detail+a.act).toLowerCase().includes(f.q.toLowerCase()))).map(a=>({Time:a.t,Person:a.un||uname(a.uid),Action:a.act,Area:a.mod,Detail:a.detail}));
+  saveFile(`audit_log_${new Date().toISOString().slice(0,10)}.csv`,toCsv(['Time','Person','Action','Area','Detail'],rows),'audit',`Downloaded ${rows.length} audit row(s)`)};draw();
+};
+
+/* ----- Sessions ----- */
+VIEWS.sessions=v=>{
+ v.innerHTML=`<div class="page-h"><div><h2>Active Sessions</h2><p>Everyone signs in with their own session, so one person signing in or out never affects anyone else. End a single session to sign only that device out.</p></div></div>
+ <div class="tablewrap"><table><thead><tr><th>Person</th><th>Device</th><th>IP address</th><th>Signed in</th><th>Last active</th><th></th></tr></thead><tbody>
+ ${SESSIONS.map(s=>`<tr><td><b>${esc(s.uname||uname(s.uid))}</b></td><td>${esc(s.device)}</td><td class="mono">${s.ip}</td><td class="num">${s.since}</td><td>${s.seen}</td>
+ <td class="r">${(s.current||s.id===S.session.id)?'<span class="pill accent">This session</span>':`<button class="btn danger sm" data-end="${s.id}">End session</button>`}</td></tr>`).join('')}</tbody></table></div>
+ ${LIVE?'<div class="card panel"><h3>Session rules</h3><div class="muted">Idle timeout and maximum session length are set on the server with SESSION_IDLE_MIN and SESSION_MAX_HOURS.</div></div>':`<div class="card panel"><h3>Session rules</h3>
+  ${[['Sign out after 30 minutes of no activity',true],['Require a second factor at sign in',true],['Only allow sign in from office IP ranges',false],['One active session per person',false]].map((r,i)=>`<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><span>${r[0]}</span><label class="switch"><input type="checkbox" data-rule="${i}" ${r[1]?'checked':''}><i></i></label></div>`).join('')}
+  <div class="muted" style="font-size:12.5px">These switches are display only until the auth backend is connected.</div></div>`}`;
+ $$('[data-end]',v).forEach(b=>b.onclick=async()=>{
+  if(LIVE){try{await api('DELETE','/api/admin/sessions/'+encodeURIComponent(b.dataset.end));toast('Session ended.')}catch(e){toast(e.message||'Could not end the session.')}return renderView()}
+  const s=SESSIONS.find(x=>x.id===b.dataset.end);const oe=S.open.find(o=>o.session===s);if(oe)closeEntry(oe);else SESSIONS=SESSIONS.filter(x=>x!==s);log('session','admin','Ended session for '+uname(s.uid));renderView()});
+ $$('[data-rule]',v).forEach(i=>i.onchange=()=>log('setting','admin','Session rule '+i.dataset.rule+(i.checked?' on':' off')));
+};
+
+/* ----- Data Sources ----- */
+VIEWS.sources=v=>{
+ v.innerHTML=`<div class="page-h"><div><h2>Data Sources</h2><p>Every module reads from a Superset dataset. Add its curl and the sample data is replaced with live results.</p></div></div>
+ <div class="pgh" style="border:0;padding-bottom:0"><h3>Report connections</h3></div>
+ <div class="srcgrid">${supCards()}</div>
+ <div id="supBox"></div>
+ ${LIVE?'<div class="muted">Fees & Commissions, Limits, Giftcards and GPL tokens still show sample data. Their queries have not been added yet.</div>':`<div class="pgh" style="border:0;padding-bottom:0"><h3>Other modules</h3></div>
+  <div class="srcgrid">${MODULES.filter(m=>!['txns','search'].includes(m.id)).map(m=>`<div class="card srccard"><div style="display:flex;gap:12px;align-items:center"><span class="pi">${ic(m.ico)}</span><div style="min-width:0"><b>${esc(m.name)}</b><div class="mono muted" style="overflow:hidden;text-overflow:ellipsis">${esc(SRC[m.id].replace('Superset · ',''))}</div></div></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">${m.curl?'<span class="pill good"><span class="dot"></span>Curl saved</span>':'<span class="pill warn"><span class="dot"></span>Awaiting curl</span>'}<button class="btn ghost sm" data-curl="${m.id}">${ic('terminal')}${m.curl?'Replace curl':'Add curl'}</button></div></div>`).join('')}</div>
+`} <div id="curlBox"></div>
+ <div class="two">
+  <div class="card panel"><h3>Connect MongoDB</h3>
+   <ol class="steps"><li><div><b>Create a cluster</b><div class="muted" style="font-size:13px">An Atlas M0 free cluster is enough to start.</div></div></li>
+    <li><div><b>Add a database user</b><div class="muted" style="font-size:13px">Give it read and write on the hub database only.</div></div></li>
+    <li><div><b>Allow your server's IP</b><div class="muted" style="font-size:13px">Under Network Access in Atlas.</div></div></li>
+    <li><div><b>Paste the connection string</b></div></li></ol>
+   ${LIVE?'<div class="muted" style="font-size:13px">The connection string is set with MONGODB_URI on the server. It is never typed into this page.</div>':`<div class="field"><label for="mg">Connection string</label><input class="inp mono" id="mg" placeholder="mongodb+srv://hub_app:••••@cluster0.xxxxx.mongodb.net/hub"></div>`}
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" id="mt">${ic('bolt')}Test connection</button><span id="mr" class="muted"></span></div></div>
+  <div class="card panel"><h3>What gets stored</h3>
+   <div class="tablewrap"><table style="min-width:0"><thead><tr><th>Collection</th><th>Holds</th></tr></thead><tbody>
+    <tr><td class="mono">users</td><td>Name, email, role, permissions, password hash</td></tr>
+    <tr><td class="mono">sessions</td><td>One row per sign-in, expires on its own</td></tr>
+    <tr><td class="mono">audit</td><td>Time, person, action, area, detail, IP</td></tr>
+    <tr><td class="mono">options</td><td>Custom hub options and their curl</td></tr></tbody></table></div>
+   <div class="muted" style="font-size:13px">The browser never talks to MongoDB. A small API in front of it handles sign in, permissions and logging.</div></div>
+ </div>`;
+ $$('[data-test]',v).forEach(b=>b.onclick=async()=>{const k=b.dataset.test,out=$('[data-tres="'+k+'"]',v);b.disabled=true;out.textContent='Testing…';
+  try{const r=await api('POST','/api/admin/connections/'+encodeURIComponent(k)+'/test');out.innerHTML=r.ok?`<span style="color:var(--good,#1a7f37);font-weight:600">${esc(r.message)}</span>`:`<span style="color:var(--bad,#b42318);font-weight:600">${esc(r.error)}</span>`}catch(e){out.textContent=e.message}
+  b.disabled=false});
+ $$('[data-sup]',v).forEach(b=>b.onclick=()=>{supEditor(b.dataset.sup,$('#supBox'),()=>renderView());$('#supBox').scrollIntoView({behavior:'smooth',block:'nearest'})});
+ $$('[data-curl]',v).forEach(b=>b.onclick=()=>{const m=MODULES.find(x=>x.id===b.dataset.curl);
+  $('#curlBox').innerHTML=`<div class="card panel"><h3>${esc(m.name)} · curl</h3><div class="field"><label for="cu">Paste curl command</label><textarea class="inp mono" id="cu" rows="5" placeholder="curl 'https://superset.example.com/api/v1/chart/data' -H 'Authorization: Bearer …'"></textarea></div>
+  <div style="display:flex;gap:8px"><button class="btn" id="cs">Save</button><button class="btn ghost" id="cx">Cancel</button></div></div>`;
+  $('#curlBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+  $('#cx').onclick=()=>$('#curlBox').innerHTML='';
+  $('#cs').onclick=()=>{const c=$('#cu').value.trim();if(!/^curl\s/i.test(c))return toast('That does not look like a curl command.');m.curl=c;log('setting','admin','Saved curl for '+m.name);toast('Curl saved (demo, kept in this tab only)');renderView()};
+ });
+ $('#mt').onclick=LIVE?async()=>{$('#mr').textContent='Checking…';try{const h=await api('GET','/api/admin/health');$('#mr').textContent=(h.store==='mongo'?'MongoDB connected.':'Using the in-memory store (data is lost on restart). Set MONGODB_URI.')}catch(e){$('#mr').textContent=e.message}}:()=>{const ok=/^mongodb(\+srv)?:\/\//.test($('#mg').value.trim());$('#mr').textContent=ok?'Looks valid. A live test runs once the API exists.':'Enter a mongodb:// or mongodb+srv:// string.'};
+};
+
+/* ----- Hub Options (admin builds new modules from a Superset curl) ----- */
+function curlEndpoint(c){const m=(c||'').match(/https?:\/\/[^\s'"]+/);if(!m)return 'Endpoint not detected';try{const u=new URL(m[0]);return u.host+u.pathname}catch(e){return m[0].slice(0,60)}}
+VIEWS.options=v=>{
+ const custom=MODULES.filter(m=>m.custom);
+ v.innerHTML=`<div class="page-h"><div><h2>Hub Options</h2><p>Add a new tool to the hub from a Superset dashboard curl. It appears in the sidebar and on the home screen for the roles you pick, and gets its own permission column.</p></div></div>
+ <form class="card panel" id="of"><h3>New option</h3>
+  <div class="toolbar">
+   <div class="field" style="flex:2 1 240px"><label for="on">Name</label><input class="inp" id="on" required placeholder="e.g. Agent float balances"></div>
+   </div>
+  <div class="field"><label>Icon</label><div class="picker">${['dashboard','analytics','payments','account_balance','credit_card','storefront','local_shipping','support_agent','qr_code_2','shield','fact_check','trending_up','badge','inventory_2','phone_iphone','lightbulb'].map((n,i)=>`<label title="${n}"><input type="radio" name="oi" value="${n}" ${i===0?'checked':''}><span class="pk">${ic(n)}</span></label>`).join('')}</div></div>
+  <div class="field"><label for="od">Description</label><input class="inp" id="od" placeholder="What people use this for"></div>
+  <div class="field"><label for="ofl">Search fields (comma separated)</label><input class="inp" id="ofl" placeholder="Account number, Date range" value="Account number"></div>
+  <div class="field"><label for="oc">Superset dashboard curl</label><textarea class="inp mono" id="oc" rows="5" placeholder="curl 'https://superset.example.com/api/v1/dashboard/12/charts' -H 'Authorization: Bearer …'"></textarea>
+   <span class="muted" style="font-size:12.5px;text-transform:none;letter-spacing:0;font-weight:400">Leave empty to add the curl later. Once a backend exists, tokens in the curl are kept on the server and never shown in the browser. Only the endpoint is displayed here.</span></div>
+  <div class="field"><label>Who gets access</label><div class="demo-users">${['Admin','Supervisor','Agent'].map(r=>`<label class="chip" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" class="orole" value="${r}" ${r==='Admin'?'checked disabled':''}> ${r}</label>`).join('')}</div></div>
+  <div class="err" id="oerr"></div>
+  <div><button class="btn" type="submit">Create option</button></div></form>
+ <div class="card panel"><h3>Your custom options</h3>
+  ${custom.length?`<div class="tablewrap"><table><thead><tr><th>Option</th><th>Fields</th><th>Superset endpoint</th><th></th></tr></thead><tbody>${custom.map(m=>`<tr><td><b>${esc(m.name)}</b><div class="muted" style="font-size:12.5px">${esc(m.desc)}</div></td><td>${m.fields.map(f=>`<span class="pill neutral">${esc(f)}</span>`).join(' ')}</td><td class="mono">${m.curl?esc(curlEndpoint(m.curl)):'<span class="pill warn">Awaiting curl</span>'}</td>
+   <td class="r"><button class="btn ghost sm" data-open="${m.id}">Open</button> <button class="btn ghost sm" data-ec="${m.id}">${m.curl?'Replace curl':'Add curl'}</button> <button class="btn danger sm" data-del="${m.id}">Remove</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Nothing here yet. Options you create will be listed here.</div>'}
+  <div id="ebox"></div></div>`;
+ $('#of').onsubmit=async e=>{
+  e.preventDefault();
+  const name=$('#on').value.trim(),curl=$('#oc').value.trim();
+  if(MODULES.some(m=>m.name.toLowerCase()===name.toLowerCase()))return $('#oerr').textContent='An option with that name already exists.';
+  if(curl&&!/^curl\s/i.test(curl))return $('#oerr').textContent='That does not look like a curl command. It should start with "curl".';
+  const roles=['Admin',...$$('.orole:checked').map(x=>x.value)];
+  if(LIVE){
+   const fields=$('#ofl').value.split(',').map(x=>x.trim()).filter(Boolean).slice(0,5);
+   try{await api('POST','/api/admin/options',{name,ico:($('input[name=oi]:checked')||{value:'dashboard'}).value,desc:$('#od').value.trim(),fields:fields.length?fields:['Search'],curl,roles});toast('Created "'+name+'"');await liveStart();S.route='options';renderShell()}catch(x){$('#oerr').textContent=x.message}
+   return;
+  }
+  const m={id:'c_'+Date.now(),name,ico:($('input[name=oi]:checked')||{value:'dashboard'}).value,desc:$('#od').value.trim()||'Custom Superset dashboard.',custom:true,curl,
+   fields:$('#ofl').value.split(',').map(x=>x.trim()).filter(Boolean).slice(0,5)};
+  if(!m.fields.length)m.fields=['Search'];
+  MODULES.push(m);SRC[m.id]='Superset · custom dashboard';
+  roles.forEach(r=>{const add=r==='Agent'?[m.id]:[m.id,EXP(m.id)];DEFAULT_PERMS[r].push(...add);USERS.filter(u=>u.role===r).forEach(u=>u.perms.push(...add))});
+  log('create','admin','Created option "'+name+'" for '+roles.join(', '));toast('Created "'+name+'"');renderShell();
+ };
+ $$('[data-open]',v).forEach(b=>b.onclick=()=>go(b.dataset.open));
+ $$('[data-del]',v).forEach(b=>b.onclick=()=>{const m=MODULES.find(x=>x.id===b.dataset.del);
+  $('#ebox').innerHTML=`<div class="diag"><b>Remove "${esc(m.name)}"?</b><span>It disappears for everyone and its permission column is deleted.</span><div style="display:flex;gap:8px;margin-top:6px"><button class="btn danger sm" id="dy">Remove</button><button class="btn ghost sm" id="dn">Keep</button></div></div>`;
+  $('#dn').onclick=()=>$('#ebox').innerHTML='';
+  $('#dy').onclick=async()=>{if(LIVE){try{await api('DELETE','/api/admin/options/'+encodeURIComponent(m.id));await liveStart();S.route='options';renderShell()}catch(e){toast(e.message)}return}
+   MODULES.splice(MODULES.indexOf(m),1);const gone=p=>p!==m.id&&p!==EXP(m.id);USERS.forEach(u=>u.perms=u.perms.filter(gone));Object.keys(DEFAULT_PERMS).forEach(k=>DEFAULT_PERMS[k]=DEFAULT_PERMS[k].filter(gone));log('delete','admin','Removed option "'+m.name+'"');renderShell()}});
+ $$('[data-ec]',v).forEach(b=>b.onclick=()=>{const m=MODULES.find(x=>x.id===b.dataset.ec);
+  $('#ebox').innerHTML=`<div class="field"><label for="ecu">New curl for ${esc(m.name)}</label><textarea class="inp mono" id="ecu" rows="4"></textarea></div><div style="display:flex;gap:8px"><button class="btn" id="es">Save curl</button><button class="btn ghost" id="ex">Cancel</button></div>`;
+  $('#ex').onclick=()=>$('#ebox').innerHTML='';
+  $('#es').onclick=async()=>{const c=$('#ecu').value.trim();if(!/^curl\s/i.test(c))return toast('That does not look like a curl command.');
+   if(LIVE){try{await api('PUT','/api/admin/options/'+encodeURIComponent(m.id),{curl:c});toast('Curl saved.')}catch(e){return toast(e.message)}return renderView()}
+   m.curl=c;log('setting','admin','Updated curl for '+m.name);renderView()}});
+};
+
+function customView(v){
+ const m=MODULES.find(x=>x.id===S.route),f=S.filters[m.id]||(S.filters[m.id]={});
+ v.innerHTML=head(m.name,m.desc,m.id)+`
+ <form class="card panel" id="cf"><div class="toolbar">${m.fields.map((x,i)=>`<div class="field"><label for="cf${i}">${esc(x)}</label><input class="inp" id="cf${i}" value="${esc(f[x]||'')}"></div>`).join('')}<button class="btn" type="submit">Run</button></div></form>
+ <div id="cr"></div>`;
+ const run=(logIt)=>{
+  const vals=m.fields.map((x,i)=>$('#cf'+i).value.trim());m.fields.forEach((x,i)=>f[x]=vals[i]);
+  if(logIt)log('search',m.id,m.fields.map((x,i)=>x+': "'+vals[i]+'"').join(', '));
+  const s=hash(vals.join('|')||m.id);
+  const rows=Array.from({length:5},(_,i)=>{const k=hash(s+'r'+i);return [...m.fields.map((x,j)=>vals[j]||('Sample '+(100+k%900))),money(k%900),pick(['Success','Pending','Failed'],k>>3)]});
+  $('#cr').innerHTML=`<div class="card panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>Result</h3>${m.curl?`<span class="pill good"><span class="dot"></span>Curl saved · <span class="mono">${esc(curlEndpoint(m.curl))}</span></span>`:'<span class="pill warn"><span class="dot"></span>Awaiting curl</span>'}</div>
+  <div style="border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted)">The Superset dashboard response will be shown here once the format is added. Sample rows are below.</div>
+  <div class="tablewrap"><table><thead><tr>${m.fields.map(x=>`<th>${esc(x)}</th>`).join('')}<th class="r">Value</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.slice(0,-2).map(c=>`<td>${esc(c)}</td>`).join('')}<td class="r num">${r[r.length-2]}</td><td>${pill(r[r.length-1])}</td></tr>`).join('')}</tbody></table></div><div style="display:flex;justify-content:flex-end">${exportBtn(m.id)}</div></div>`;wireExport($('#cr'),m.id);
+ };
+ $('#cf').onsubmit=e=>{e.preventDefault();run(true)};run(false);
+}
+
+/* ========== command palette ========== */
+function openCmd(){
+ const items=q=>{
+  const base=[...MODULES.filter(m=>can(m.id)).map(m=>({l:'Open '+m.name,a:()=>go(m.id)})),...(can('admin')?ADMIN.map(a=>({l:'Open '+a.name,a:()=>go(a.id)})):[])];
+  const f=base.filter(i=>i.l.toLowerCase().includes(q.toLowerCase()));
+  if(q&&can('search'))f.unshift({l:`Search customers for "${q}"`,a:()=>{S.tab.search=/^\d+$/.test(q)?'id':'name';S.sel.searchQ=q;go('search')}});
+  return f;
+ };
+ $('#overlay').innerHTML=`<div class="cmd-bg" id="cb"><div class="card cmd"><input id="ci" placeholder="Type a module name, or a name or ID to search" autocomplete="off"><ul id="cl"></ul></div></div>`;
+ const draw=()=>{const l=items($('#ci').value);$('#cl').innerHTML=l.map((i,n)=>`<li data-n="${n}" class="${n===0?'sel':''}">${esc(i.l)}</li>`).join('')||'<li class="muted">No matches</li>';
+  $$('#cl li[data-n]').forEach(li=>li.onclick=()=>{const it=l[+li.dataset.n];close();it.a()});window._cmd=l};
+ const close=()=>$('#overlay').innerHTML='';
+ $('#ci').oninput=draw;$('#ci').focus();draw();
+ $('#cb').onclick=e=>{if(e.target.id==='cb')close()};
+ $('#ci').onkeydown=e=>{if(e.key==='Escape')close();if(e.key==='Enter'&&window._cmd[0]){const it=window._cmd[0];close();it.a()}};
+}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&S.user){e.preventDefault();openCmd()}});
+
+/* ========== boot ========== */
+LIVE?liveBoot():renderLogin();
+</script>
